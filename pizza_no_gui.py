@@ -12,6 +12,7 @@ from players.default_player import Player as p3
 from players.default_player import Player as p4
 from players.default_player import Player as p5
 from players.default_player import Player as p6
+import pickle as pkl
 
 class no_gui():
 
@@ -47,11 +48,12 @@ class no_gui():
         #replace with arguments
         #self.autoplayer_number = args.autoplayer_number
         self.generator_number = int(args.generator_number)
-        self.multiplier = int(args.interface_size) #(default 40))
+        self.multiplier = int(args.interface_size) #(default 40)
         self.rng_generator_100 = np.random.default_rng(int(args.gen_100_seed))
         self.rng_generator_10 = np.random.default_rng(int(args.gen_10_seed))
         self.player_nogui = int(args.player)
         self.num_toppings_nogui = int(args.num_toppings)
+        self.is_tournament = True if str(args.tournament) == "True" else False
 
     def initialise_player(self, player_px, autoplayer) :
             #setting player
@@ -96,6 +98,7 @@ class no_gui():
             B_total = 0
             C_total = 0
             S_total = 0
+            results_run = [self.pizzas]
             for i in range(len(self.pizzas)):
                 pizza_id = self.pizza_choice_order[i]
                 f.write('\n')
@@ -136,6 +139,9 @@ class no_gui():
                 f.write('\n')
                 f.write('\n')
                 print(f"Customer {str(i+1)}, pizza {str(pizza_id)}, U = {str(np.round(U[i].sum(), 2))}, B = {str(np.round(B[i].sum(), 2))}, C = {str(np.round(C[i].sum(), 2 ))}, S = {str(np.round((np.sum(B[i], axis = 1) - np.sum(C[i], axis = 1)).sum(), 2))}")
+                written_cut = [((self.cuts[pizza_id][0]-self.x)/self.multiplier), ((self.cuts[pizza_id][1]-self.y)/self.multiplier), (self.cuts[pizza_id][2])]
+                result = {"Customer": i+1, "Cut" : written_cut ,"Pizza_id": pizza_id, "U": np.round(U[i].sum(), 2), "B": np.round(B[i].sum(), 2), "C": np.round(C[i].sum(), 2 ), "S": np.round((np.sum(B[i], axis = 1) - np.sum(C[i], axis = 1)).sum(), 2)}
+                results_run.append(result)
             f.write("Total Score U : " + str(U_total))
             print("Total Score U : " + str(U_total))
             f.write('\n')
@@ -149,6 +155,13 @@ class no_gui():
             print("Total score S : " + str(S_total))
             f.write('\n')
             f.write('\n')
+            results_run.append({"U":U_total, "B":B_total, "C":C_total, "S":S_total})
+            if self.is_tournament:
+                with open("tournament_results.pkl", "rb") as fp:
+                    a = pkl.load(fp)
+                    a[self.player_nogui-1].append(results_run)
+                with open("tournament_results.pkl", "wb") as fp:
+                    pkl.dump(a, fp)
 
     def run(self):
         self.num_player = self.player_nogui

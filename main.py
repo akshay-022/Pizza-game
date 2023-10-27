@@ -18,7 +18,9 @@ if __name__ == '__main__':
     parser.add_argument("--generator_number", "-g_num", default=0, help="Which player is the preference generator")
     parser.add_argument("--player", "-p", default=0, help="Team number playing the game if no gui")
     parser.add_argument("--num_toppings", "-num_top", default=2, help="Total different types of toppings")
+    parser.add_argument("--tournament", "-tmnt", default=False, help="Is this a tournament run or not")
     args = parser.parse_args()
+    args.tournament = "False"
     if args.gui == "True":
         instance = gui(args)
         instance.run()

@@ -68,10 +68,10 @@ class Player:
             pizza_indiv = np.zeros((24,3))
             i = 0
             while i<24:
-                angle = self.rng.random()*2*np.pi
-                dist = self.rng.random()*6
-                x = dist*np.cos(angle)
-                y = dist*np.sin(angle)
+                angle = i * (2 * np.pi / 11) # self.rng.random()*2*np.pi
+                dist = 5.0 - (i*0.14) # self.rng.random()*6
+                x = dist * np.cos(angle)
+                y = dist * np.sin(angle)
                 clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
                 if not clash_exists:
                     pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
@@ -79,8 +79,26 @@ class Player:
             pizza_indiv = np.array(pizza_indiv)
             pizzas[j] = pizza_indiv
         return list(pizzas)
-    
 
+        pizzas = np.zeros((10, 24, 3))
+        for j in range(constants.number_of_initial_pizzas):
+            pizza_indiv = np.zeros((24, 3))
+            topping_counts = [0] * self.num_toppings
+            i = 0
+            while i < 24:
+                angle = i * (2 * np.pi / 24)
+                dist = 6.0
+                x = dist * np.cos(angle)
+                y = dist * np.sin(angle)
+                topping_num = topping_counts.index(min(topping_counts)) + 1
+                pizza_indiv[i] = [x, y, topping_num]
+                topping_counts[topping_num - 1] += 1
+                clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
+                if not clash_exists:
+                    pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
+                    i = i+1
+
+        return list(pizzas)
 
 
     #def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
