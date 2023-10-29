@@ -57,7 +57,50 @@ class Player:
         Returns:
             pizzas(list) : List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping center, y coordinate of topping center, topping number of topping(1/2/3/4) (Note that it starts from 1, not 0)]
         """
-        
+        if self.num_toppings == 2:
+            #arrange 6 in two lines 
+            #arrange 4 in clusters 
+            #honestly for 2 topping the lines may make more sense 
+            #x_margin = math.sqrt(6**2-4.5**2) #circle geoemetry 
+            pizzas = np.zeros((10, 24, 3))
+            pizza = np.zeros((24, 3))
+            x_margin = 1 
+            new_y_start_change = (6-mat.sqrt(35))/2 
+            center_size = .375 
+            #now lets find the starting point 
+            x_pos_left = -x_margin - center_size 
+            x_pos_right = x_margin + center_size 
+
+            y_start = new_y_start_change
+            #loop thru a range of 12 where we place all w x-x_margin 
+            #have y start at new_y_start_change and go down .75 each time 
+            #pizza = []
+            y = y_start
+            #for i in range(24):
+            for i in range(12):
+                pizza[i][0] = x_pos_left
+                pizza[i][1] = y
+                pizza[i][2] = 1 
+                y -= .75 #to move down
+            y = y_start
+            for j in range(12,24):
+                pizza[i][0] = x_pos_right
+                pizza[i][1] = y
+                pizza[i][2] = 2 
+                y -= .75 #to move down
+            
+            for x in range(10):
+                pizzas.append(pizza)
+            print("using this function")
+            return list(pizzas)
+                
+
+            #do the same with x+x_margin and toppin id 2 
+
+            #repeat 10 times to make all 10 pizzas 
+
+            #return list of pizzas 
+        print("using this function oop")
         x_coords = [np.sin(np.pi/2)]
         pizzas = np.zeros((10, 24, 3))
         for j in range(constants.number_of_initial_pizzas):
@@ -74,6 +117,10 @@ class Player:
                     i = i+1
             pizza_indiv = np.array(pizza_indiv)
             pizzas[j] = pizza_indiv
+        for pizza in pizzas:
+            for topping in pizza:
+                print("x postion is " + str(topping[0]))
+                print("y postion is " + str(topping[1]))
         return list(pizzas)
     
 
