@@ -16,10 +16,10 @@ from collections import defaultdict  # For easier handling of data structures
 from typing import List, Tuple, Dict  # For type annotations
 from tokenize import String
 import constants
-from utils import pizza_calculations
+
 
 class Player:
-    def __init__(self, num_toppings, rng):
+    def __init__(self, num_toppings, rng=None):
         """
         Initialize the player with the number of toppings and a random number generator.
 
@@ -33,7 +33,6 @@ class Player:
         self.preference_analysis = []
 
     def customer_gen(self, num_cust, rng=None):
-
         """Function in which we create a distribution of customer preferences
 
         Args:
@@ -44,18 +43,21 @@ class Player:
             preferences_total(list) : List of size [num_cust, 2, num_toppings], having all generated customer preferences
         """
 
+        # https://www.statisticshowto.com/beta-distribution/
+        alpha = 2.0  # test & adjust as neededs
+        beta = 2.0  # test & adjust as needed
+
         preferences_total = []
         if rng == None:
+            np.random.seed(self.rng)
+            print("beta distribution")
             for i in range(num_cust):
-                preferences_1 = self.rng.random((self.num_toppings,))
-                preferences_1 = 12 * preferences_1 / np.sum(preferences_1)
-                preferences_2 = self.rng.random((self.num_toppings,))
-                preferences_2 = 12 * preferences_2 / np.sum(preferences_2)
-                preferences = [preferences_1, preferences_2]
-                equal_prob = self.rng.random()
-                if equal_prob <= 0.0:
-                    preferences = (np.ones((2, self.num_toppings)) * 12 / self.num_toppings).tolist()
-                preferences_total.append(preferences)
+                preferences_1 = np.random.beta(alpha, beta, self.num_toppings)
+                # ensure non-neg values
+                preferences_1 = np.clip(preferences_1, 0, None)
+                preferences_1 /= preferences_1.sum()  # normalize
+                preferences_total.append(
+                    [preferences_1.tolist(), preferences_1.tolist()])  # duplicate
         else:
             for i in range(num_cust):
                 preferences_1 = rng.random((self.num_toppings,))
@@ -65,8 +67,10 @@ class Player:
                 preferences = [preferences_1, preferences_2]
                 equal_prob = rng.random()
                 if equal_prob <= 0.0:  # change this if you want toppings to show up
-                    preferences = (np.ones((2, self.num_toppings)) * 12 / self.num_toppings).tolist()
+                    preferences = (np.ones((2, self.num_toppings))
+                                   * 12 / self.num_toppings).tolist()
                 preferences_total.append(preferences)
+
         return preferences_total
 
     def choose_toppings(self, preferences):
@@ -84,11 +88,13 @@ class Player:
 
         pizzas = []
         for _ in range(constants.number_of_initial_pizzas):
-            toppings = place_toppings_optimally(self.preference_analysis, self.num_toppings)
+            toppings = place_toppings_optimally(
+                self.preference_analysis, self.num_toppings)
             pizza_array = np.zeros((24, 3))
 
             for i, (x, y, topping_type) in enumerate(toppings):
-                pizza_array[i] = [x, y, topping_type + 1]  # Adjust topping_type to be 1-indexed
+                # Adjust topping_type to be 1-indexed
+                pizza_array[i] = [x, y, topping_type + 1]
 
             pizzas.append(pizza_array)
 
@@ -113,10 +119,12 @@ class Player:
 
         for pizza_id in remaining_pizza_ids:
             # Convert pizza format to the one expected by optimize_pizza_selection_and_cut
-            pizza = [(x, y, topping_type - 1) for x, y, topping_type in pizzas[pizza_id]]
+            pizza = [(x, y, topping_type - 1)
+                     for x, y, topping_type in pizzas[pizza_id]]
 
             # Find the best cut for this pizza
-            cut_position, cut_angle, score = find_best_cut_for_pizza(pizza, customer_amounts)
+            cut_position, cut_angle, score = find_best_cut_for_pizza(
+                pizza, customer_amounts)
 
             # Check if this pizza and cut is better than the current best
             if score < best_score:
@@ -128,6 +136,8 @@ class Player:
         return best_pizza_id, list(best_cut_position), best_cut_angle
 
 # Analyze customer preferences to identify common patterns
+
+
 def analyze_preferences(preferences):
     """
     Analyze customer preferences to identify common patterns.
@@ -150,6 +160,7 @@ def analyze_preferences(preferences):
 
     return analysis_results
 
+
 def clash_exists(x, y, existing_toppings, topping_radius):
     """
     Check if a new topping placement clashes with existing toppings.
@@ -169,6 +180,8 @@ def clash_exists(x, y, existing_toppings, topping_radius):
     return False
 
 # Place toppings on a pizza considering the common preference patterns
+
+
 def place_toppings_optimally(preference_analysis, num_toppings):
     """
     Place toppings on a pizza considering the common preference patterns.
@@ -200,6 +213,8 @@ def place_toppings_optimally(preference_analysis, num_toppings):
     return toppings
 
 # Select the best pizza for the customer and determine the optimal cut
+
+
 def optimize_pizza_selection_and_cut(pizzas, customer_preferences):
     """
     Select the best pizza for the customer and determine the optimal cut.
@@ -218,7 +233,8 @@ def optimize_pizza_selection_and_cut(pizzas, customer_preferences):
 
     for i, pizza in enumerate(pizzas):
         # Find the best cut for this pizza
-        cut_position, cut_angle, score = find_best_cut_for_pizza(pizza, customer_preferences)
+        cut_position, cut_angle, score = find_best_cut_for_pizza(
+            pizza, customer_preferences)
 
         # Check if this pizza and cut is better than the current best
         if score < best_score:
@@ -230,6 +246,8 @@ def optimize_pizza_selection_and_cut(pizzas, customer_preferences):
     return best_pizza, best_cut_position, best_cut_angle
 
 # Geometric calculations for determining the best cut
+
+
 def find_best_cut_for_pizza(pizza, preferences):
     """
     Find the best cut for a given pizza based on customer preferences.
@@ -248,7 +266,8 @@ def find_best_cut_for_pizza(pizza, preferences):
     # Discretize the search space
     for x in np.linspace(-6, 6, num=20):  # Assuming the pizza diameter is 12
         for y in np.linspace(-6, 6, num=20):
-            for angle in np.linspace(0, 2 * math.pi, num=36):  # Trying different angles
+            # Trying different angles
+            for angle in np.linspace(0, 2 * math.pi, num=36):
                 # Calculate the score for this cut
                 score = calculate_cut_score(pizza, (x, y), angle, preferences)
 
@@ -275,7 +294,8 @@ def calculate_cut_score(pizza, cut_position, cut_angle, preferences):
     float: Score representing how well the cut matches the preferences.
     """
     # Initialize distribution of toppings in each slice
-    slice_toppings = [{i: 0 for i in range(len(preferences[0]))} for _ in range(8)]
+    slice_toppings = [{i: 0 for i in range(
+        len(preferences[0]))} for _ in range(8)]
 
     # Loop through each topping to determine its slice
     for x, y, topping_type in pizza:
@@ -285,7 +305,8 @@ def calculate_cut_score(pizza, cut_position, cut_angle, preferences):
     # Compare the distribution with the preferences to calculate the score
     score = 0
     for slice_index, toppings in enumerate(slice_toppings):
-        expected_distribution = preferences[slice_index % 2]  # Alternating preferences
+        # Alternating preferences
+        expected_distribution = preferences[slice_index % 2]
         for topping_type, amount in toppings.items():
             preferred_amount = expected_distribution[topping_type]
             score += abs(amount - preferred_amount)
@@ -319,6 +340,8 @@ def determine_slice_index(x, y, cut_position, cut_angle):
     return slice_index
 
 # Optimization technique for selecting the best pizza
+
+
 def select_best_pizza(pizzas, customer_preferences):
     """
     Select the best pizza based on the customer's preferences.
@@ -330,5 +353,6 @@ def select_best_pizza(pizzas, customer_preferences):
     Returns:
     Tuple[int, Tuple[float, float], float]: Index of the selected pizza, cut position, and cut angle.
     """
-    selected_pizza, cut_position, cut_angle = optimize_pizza_selection_and_cut(pizzas, customer_preferences)
+    selected_pizza, cut_position, cut_angle = optimize_pizza_selection_and_cut(
+        pizzas, customer_preferences)
     return selected_pizza, cut_position, cut_angle
