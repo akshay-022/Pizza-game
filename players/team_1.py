@@ -3,6 +3,7 @@ import numpy as np
 from typing import Tuple, List
 import constants
 from utils import pizza_calculations
+import math
 
 class Player:
     def __init__(self, num_toppings, rng: np.random.Generator) -> None:
@@ -22,7 +23,7 @@ class Player:
             preferences_total(list) : List of size [num_cust, 2, num_toppings], having all generated customer preferences
         """
 
-        mean = 0.5
+        '''mean = 0.5
         std_dev = 2.0
         
         preferences_total = []
@@ -44,6 +45,31 @@ class Player:
                 preferences_total.append([preferences_1.tolist(), preferences_1.tolist()])  # Duplicate preferences
 
         print(f'preferences total {preferences_total}')
+        return preferences_total'''
+
+        preferences_total = []
+        if rng==None:
+            for i in range(num_cust):
+                preferences_1 = self.rng.random((self.num_toppings,))
+                preferences_1 = 12*preferences_1/np.sum(preferences_1)
+                preferences_2 = self.rng.random((self.num_toppings,))
+                preferences_2 = 12*preferences_2/np.sum(preferences_2)
+                preferences = [preferences_1, preferences_2]
+                equal_prob = self.rng.random()
+                if equal_prob <= 0.0:
+                    preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
+                preferences_total.append(preferences)
+        else : 
+            for i in range(num_cust):
+                preferences_1 = rng.random((self.num_toppings,))
+                preferences_1 = 12*preferences_1/np.sum(preferences_1)
+                preferences_2 = rng.random((self.num_toppings,))
+                preferences_2 = 12*preferences_2/np.sum(preferences_2)
+                preferences = [preferences_1, preferences_2]
+                equal_prob = rng.random()
+                if equal_prob <= 0.0:       #change this if you want toppings to show up
+                    preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
+                preferences_total.append(preferences) 
         return preferences_total
 
     #def choose_discard(self, cards: list[str], constraints: list[str]):
@@ -62,10 +88,12 @@ class Player:
             #arrange 4 in clusters 
             #honestly for 2 topping the lines may make more sense 
             #x_margin = math.sqrt(6**2-4.5**2) #circle geoemetry 
-            pizzas = np.zeros((10, 24, 3))
+            #pizzas = np.zeros((10, 24, 3))
+            pizzas = []
             pizza = np.zeros((24, 3))
             x_margin = 1 
-            new_y_start_change = (6-mat.sqrt(35))/2 
+            #new_y_start_change = (6-math.sqrt(35))/2 
+            new_y_start_change = .75*6
             center_size = .375 
             #now lets find the starting point 
             x_pos_left = -x_margin - center_size 
@@ -81,16 +109,30 @@ class Player:
                 pizza[i][0] = x_pos_left
                 pizza[i][1] = y
                 pizza[i][2] = 1 
-                y -= .75 #to move down
+                y -= .76 #to move down
+                #print("x_pos left: " + str(x_pos_left) + "and y " + str(y))
             y = y_start
             for j in range(12,24):
-                pizza[i][0] = x_pos_right
-                pizza[i][1] = y
-                pizza[i][2] = 2 
-                y -= .75 #to move down
+                pizza[j][0] = x_pos_right
+                pizza[j][1] = y
+                pizza[j][2] = 2 
+                y -= .76 #to move down
+                #print("x_pos right: " + str(x_pos_right) + "and y " + str(y))
+            
+            '''for topping in pizza: 
+                    print("this is x " + str(topping[0]))
+                    print("this is y " + str(topping[1]))
+                    print("this is id " + str(topping[2]))'''
             
             for x in range(10):
                 pizzas.append(pizza)
+
+            '''for pizza in pizzas: 
+                for topping in pizza: 
+                    print("this is x " + str(topping[0]))
+                    print("this is y " + str(topping[1]))
+                    print("this is id " + str(topping[2]))'''
+
             print("using this function")
             return list(pizzas)
                 
