@@ -4,6 +4,7 @@ from typing import Tuple, List
 import constants
 from utils import pizza_calculations
 import math
+import random
 
 class Player:
     def __init__(self, num_toppings, rng: np.random.Generator) -> None:
@@ -181,4 +182,22 @@ class Player:
             Tuple[int, center, first cut angle]: Return the pizza id you choose, the center of the cut in format [x_coord, y_coord] where both are in inches relative of pizza center of radius 6, the angle of the first cut in radians. 
         """
         pizza_id = remaining_pizza_ids[0]
-        return  remaining_pizza_ids[0], [0,0], np.pi/8
+        x =  random.uniform(-6, 6)
+        y = self.circleCoordinates(x)
+        return  remaining_pizza_ids[0], [x,y], np.pi/6
+
+    #this function will take in an x and return the other y coordinate from the equation of a circle
+    def circleCoordinates(self, x):
+        positive = random.randint(0, 1) #make y the top half or bottom half of circle
+        y = 0 
+        radius = 6
+        if positive:
+            y = math.sqrt((radius**2) - (x**2))
+        else:
+            y = -(math.sqrt((radius**2) - (x**2)))
+        
+        return y
+
+            
+
+
