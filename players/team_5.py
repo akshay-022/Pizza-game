@@ -61,10 +61,18 @@ class Player:
         print(pizzas)
         return list(pizzas)
 
+    def _topping_coords(self, angle_start, angle_end, amount, category):
+        theta = (angle_end-angle_start)/(2*amount)
+        radius = self.BUFFER + 0.375/sin(theta)
+        return [[radius*cos(angle_start+(2*i+1)*theta), radius*sin(angle_start+(2*i+1)*theta), category] for i in range(amount)]
+        
+
     def _get_topping_2(self, preferences):
-        radius = self.BUFFER + 0.375 / sin(pi / 24)
-        theta = pi/24
-        pizza = [[radius*cos((2*i+1)*theta), radius*sin((2*i+1)*theta), 1+i//12] for i in range(24)]
+        inner = self._topping_coords(0, pi, 4, 1) +\
+                self._topping_coords(pi, 2*pi, 4, 2)
+        outer = self._topping_coords(0, pi, 8, 1) +\
+                self._topping_coords(pi, 2*pi, 8, 2)
+        pizza = inner + outer
         return [pizza] * 10
 
     def _get_topping_3(self, preferences):
@@ -103,7 +111,7 @@ class Player:
     def _get_cut_2(self, pizzas, remaining_pizza_ids, customer_amounts):
         # not considering non-integer cuts
         angle = customer_amounts[0][0]/12 * pi
-        radius = sqrt(2)*(self.BUFFER + 0.375 + 0.375 / sin(pi / 24))
+        radius = sqrt(2)*(self.BUFFER + 0.375 + 0.375 / sin(pi / 16))
         return remaining_pizza_ids[0], [radius*cos(pi+angle), radius*sin(pi+angle)], angle
 
     def _get_cut_3(self, pizzas, remaining_pizza_ids, customer_amounts):
