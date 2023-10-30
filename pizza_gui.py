@@ -232,10 +232,10 @@ class gui():
             column = pizza_id%5
             row = pizza_id//5
             x_small = self.x - (2.5-(column+1))*self.x/2
-            if self.multiplier>=30:
+            if self.multiplier>=35:
                 y_small = self.y - (1-(row+1))*self.y - 100
             else:
-                y_small = self.y - (1-(row+1))*0.5*self.y - 100
+                y_small = self.y - (1-(row+1))*0.6*self.y - 100
             multiplier_small = self.multiplier/2
             self.canvas.create_oval(self.template_adjustor + x_small - (multiplier_small*6), -self.template_adjustor + y_small - (multiplier_small*6), self.template_adjustor + x_small + (multiplier_small*6), -self.template_adjustor + y_small + (multiplier_small*6), fill = "navajo white")
             self.canvas.create_oval(self.template_adjustor + x_small - (multiplier_small*5.5), -self.template_adjustor + y_small - (multiplier_small*5.5), self.template_adjustor + x_small + (multiplier_small*5.5), -self.template_adjustor + y_small + (multiplier_small*5.5), fill = "red3")

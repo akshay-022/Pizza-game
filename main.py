@@ -10,7 +10,7 @@ from pizza_no_gui import no_gui
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--gui", "-g", default="True", help="GUI")
-    parser.add_argument("--interface_size", "-sz", default=25, help="GUI Size")
+    parser.add_argument("--interface_size", "-sz", default=40, help="GUI Size")
     parser.add_argument("--seed", "-s", default=40, help="General seed for your own functions")
     parser.add_argument("--gen_100_seed", "-s100", default=40, help="Seed for generating 100 preferences")
     parser.add_argument("--gen_10_seed", "-s10", default=45, help="Seed for generating 10 preferences")
