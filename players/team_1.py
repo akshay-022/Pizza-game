@@ -24,53 +24,28 @@ class Player:
             preferences_total(list) : List of size [num_cust, 2, num_toppings], having all generated customer preferences
         """
 
-        '''mean = 0.5
-        std_dev = 2.0
-        
         preferences_total = []
-        if rng==None:
+
+        if rng is None:
             np.random.seed(self.rng)
-            for i in range(num_cust):
-                preferences_1 = np.random.normal(mean, std_dev, self.num_toppings)
-                print(f'preferences 1 self.rng {preferences_1}')
-                preferences_1 = np.clip(preferences_1, 0, None)  # Ensure preferences are non-negative
-                preferences_1 /= preferences_1.sum()  # Normalize the preferences
-                preferences_total.append([preferences_1.tolist(), preferences_1.tolist()])  # Duplicate preferences
-        else :
+        else:
             np.random.seed(rng)
-            for i in range(num_cust):
-                preferences_1 = np.random.normal(mean, std_dev, self.num_toppings)
-                print(f'preferences 1 rng {preferences_1}')
-                preferences_1 = np.clip(preferences_1, 0, None)  # Ensure preferences are non-negative
-                preferences_1 /= preferences_1.sum()  # Normalize the preferences
-                preferences_total.append([preferences_1.tolist(), preferences_1.tolist()])  # Duplicate preferences
 
-        print(f'preferences total {preferences_total}')
-        return preferences_total'''
+        # standard norm distribution has mean 0 and variance 1
+        mean_vector = np.zeros(self.num_toppings)
+        # np.eye = Return a 2-D array with ones on the diagonal and zeros elsewhere.
+        covariance_matrix = np.eye(self.num_toppings)
 
-        preferences_total = []
-        if rng==None:
-            for i in range(num_cust):
-                preferences_1 = self.rng.random((self.num_toppings,))
-                preferences_1 = 12*preferences_1/np.sum(preferences_1)
-                preferences_2 = self.rng.random((self.num_toppings,))
-                preferences_2 = 12*preferences_2/np.sum(preferences_2)
-                preferences = [preferences_1, preferences_2]
-                equal_prob = self.rng.random()
-                if equal_prob <= 0.0:
-                    preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
-                preferences_total.append(preferences)
-        else : 
-            for i in range(num_cust):
-                preferences_1 = rng.random((self.num_toppings,))
-                preferences_1 = 12*preferences_1/np.sum(preferences_1)
-                preferences_2 = rng.random((self.num_toppings,))
-                preferences_2 = 12*preferences_2/np.sum(preferences_2)
-                preferences = [preferences_1, preferences_2]
-                equal_prob = rng.random()
-                if equal_prob <= 0.0:       #change this if you want toppings to show up
-                    preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
-                preferences_total.append(preferences) 
+        for i in range(num_cust):
+            preferences = np.random.multivariate_normal(mean_vector, covariance_matrix)
+
+            # clip to ensure non-negative values
+            preferences = np.clip(preferences, 0, None)
+            # normalize
+            preferences /= preferences.sum()
+
+            preferences_total.append(preferences.tolist())
+
         return preferences_total
 
     #def choose_discard(self, cards: list[str], constraints: list[str]):
