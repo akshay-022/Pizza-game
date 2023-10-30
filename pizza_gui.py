@@ -501,16 +501,16 @@ class gui():
         for i in range(constants.number_of_initial_pizzas + 1):
             for j in range(8):
                 if i==1:
-                    self.e = Entry(self.root_1, width=20, fg='black',
+                    self.e = Entry(self.root_1, width=10, fg='black',
                                 font=('Arial',16,'bold'))
                 elif i==2:
-                    self.e = Entry(self.root_1, width=20, fg='black',
+                    self.e = Entry(self.root_1, width=10, fg='black',
                                 font=('Arial',16,'bold'))
                 elif i==3:
-                    self.e = Entry(self.root_1, width=20, fg='black',
+                    self.e = Entry(self.root_1, width=10, fg='black',
                                 font=('Arial',16,'bold'))
                 else:
-                    self.e = Entry(self.root_1, width=20, fg='black',
+                    self.e = Entry(self.root_1, width=10, fg='black',
                                 font=('Arial',16,'bold'))
                 self.e.grid(row=i, column=j)
                 self.e.insert(END, list_scores[i][j])
