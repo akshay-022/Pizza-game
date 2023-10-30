@@ -10,44 +10,78 @@ class Player:
         self.rng = rng
         self.num_toppings = num_toppings
 
-    def customer_gen(self, num_cust, rng = None):
+    # def customer_gen(self, num_cust, rng = None):
         
-        """Function in which we create a distribution of customer preferences
+    #     """Function in which we create a distribution of customer preferences
+
+    #     Args:
+    #         num_cust(int) : the total number of customer preferences you need to create
+    #         rng(int) : A random seed that you can use to generate your customers. You can choose to not pass this, in that case the seed taken will be self.rng
+
+    #     Returns:
+    #         preferences_total(list) : List of size [num_cust, 2, num_toppings], having all generated customer preferences
+    #     """
+    #     preferences_total = []
+    #     if rng==None:
+    #         for i in range(num_cust):
+    #             preferences_1 = self.rng.random((self.num_toppings,))
+    #             preferences_1 = 12*preferences_1/np.sum(preferences_1)
+    #             preferences_2 = self.rng.random((self.num_toppings,))
+    #             preferences_2 = 12*preferences_2/np.sum(preferences_2)
+    #             preferences = [preferences_1, preferences_2]
+    #             equal_prob = self.rng.random()
+    #             if equal_prob <= 0.0:
+    #                 preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
+    #             preferences_total.append(preferences)
+    #     else : 
+    #         for i in range(num_cust):
+    #             preferences_1 = rng.random((self.num_toppings,))
+    #             preferences_1 = 12*preferences_1/np.sum(preferences_1)
+    #             preferences_2 = rng.random((self.num_toppings,))
+    #             preferences_2 = 12*preferences_2/np.sum(preferences_2)
+    #             preferences = [preferences_1, preferences_2]
+    #             equal_prob = rng.random()
+    #             if equal_prob <= 0.0:       #change this if you want toppings to show up
+    #                 preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
+    #             preferences_total.append(preferences) 
+    #     return preferences_total
+
+        
+    def customer_gen(self, num_cust, rng=None, alpha=2, beta=2):
+        """
+        Function to create non-uniform customer preferences using a beta distribution.
 
         Args:
-            num_cust(int) : the total number of customer preferences you need to create
-            rng(int) : A random seed that you can use to generate your customers. You can choose to not pass this, in that case the seed taken will be self.rng
+            num_cust (int): The total number of customer preferences to create.
+            rng (int): A random seed for generating customers. If None, self.rng will be used.
+            alpha (float): Alpha parameter for the beta distribution.
+            beta (float): Beta parameter for the beta distribution.
 
         Returns:
-            preferences_total(list) : List of size [num_cust, 2, num_toppings], having all generated customer preferences
+            preferences_total (list): List of size [num_cust, 2, num_toppings], containing generated customer preferences.
         """
-        
+
         preferences_total = []
-        if rng==None:
+
+        if rng is None:
             for i in range(num_cust):
-                preferences_1 = self.rng.random((self.num_toppings,))
+                preferences_1 = self.rng.beta(alpha, beta, self.num_toppings)
                 preferences_1 = 12*preferences_1/np.sum(preferences_1)
-                preferences_2 = self.rng.random((self.num_toppings,))
+                preferences_2 = self.rng.beta(alpha, beta, self.num_toppings)
                 preferences_2 = 12*preferences_2/np.sum(preferences_2)
                 preferences = [preferences_1, preferences_2]
-                equal_prob = self.rng.random()
-                if equal_prob <= 0.0:
-                    preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
                 preferences_total.append(preferences)
-        else : 
+        else:
             for i in range(num_cust):
-                preferences_1 = rng.random((self.num_toppings,))
+                preferences_1 = rng.beta(alpha, beta, self.num_toppings)
                 preferences_1 = 12*preferences_1/np.sum(preferences_1)
-                preferences_2 = rng.random((self.num_toppings,))
+                preferences_2 = rng.beta(alpha, beta, self.num_toppings)
                 preferences_2 = 12*preferences_2/np.sum(preferences_2)
                 preferences = [preferences_1, preferences_2]
-                equal_prob = rng.random()
-                if equal_prob <= 0.0:       #change this if you want toppings to show up
-                    preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
-                preferences_total.append(preferences) 
+                preferences_total.append(preferences)
+
         return preferences_total
 
-        
 
 
     #def choose_discard(self, cards: list[str], constraints: list[str]):
@@ -62,41 +96,34 @@ class Player:
             pizzas(list) : List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping center, y coordinate of topping center, topping number of topping(1/2/3/4) (Note that it starts from 1, not 0)]
         """
         
-        x_coords = [np.sin(np.pi/2)]
         pizzas = np.zeros((10, 24, 3))
-        for j in range(constants.number_of_initial_pizzas):
-            pizza_indiv = np.zeros((24,3))
-            i = 0
-            while i<24:
-                angle = i * (2 * np.pi / 11) # self.rng.random()*2*np.pi
-                dist = 5.0 - (i*0.14) # self.rng.random()*6
-                x = dist * np.cos(angle)
-                y = dist * np.sin(angle)
-                clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
-                if not clash_exists:
-                    pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
-                    i = i+1
-            pizza_indiv = np.array(pizza_indiv)
-            pizzas[j] = pizza_indiv
-        return list(pizzas)
 
-        pizzas = np.zeros((10, 24, 3))
-        for j in range(constants.number_of_initial_pizzas):
-            pizza_indiv = np.zeros((24, 3))
-            topping_counts = [0] * self.num_toppings
-            i = 0
-            while i < 24:
-                angle = i * (2 * np.pi / 24)
-                dist = 6.0
-                x = dist * np.cos(angle)
-                y = dist * np.sin(angle)
-                topping_num = topping_counts.index(min(topping_counts)) + 1
-                pizza_indiv[i] = [x, y, topping_num]
-                topping_counts[topping_num - 1] += 1
-                clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
-                if not clash_exists:
-                    pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
-                    i = i+1
+        if self.num_toppings == 2:
+            for j in range(constants.number_of_initial_pizzas):
+                pizza_indiv = np.zeros((24,3))
+                for i in range(24):
+                    angle = (i * np.pi / 12) + np.pi / 24
+                    dist = 3.0
+                    x = dist * np.cos(angle)
+                    y = dist * np.sin(angle)
+                    pizza_indiv[i] = [x, y, (i/12) + 1]
+                pizza_indiv = np.array(pizza_indiv)
+                pizzas[j] = pizza_indiv
+        else:
+            for j in range(constants.number_of_initial_pizzas):
+                        pizza_indiv = np.zeros((24,3))
+                        i = 0
+                        while i<24:
+                            angle = self.rng.random()*2*np.pi
+                            dist = self.rng.random()*6
+                            x = dist*np.cos(angle)
+                            y = dist*np.sin(angle)
+                            clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
+                            if not clash_exists:
+                                pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
+                                i = i+1
+                        pizza_indiv = np.array(pizza_indiv)
+                        pizzas[j] = pizza_indiv
 
         return list(pizzas)
 
@@ -114,4 +141,14 @@ class Player:
             Tuple[int, center, first cut angle]: Return the pizza id you choose, the center of the cut in format [x_coord, y_coord] where both are in inches relative of pizza center of radius 6, the angle of the first cut in radians. 
         """
         pizza_id = remaining_pizza_ids[0]
-        return  remaining_pizza_ids[0], [0,0], np.pi/8
+        pref = customer_amounts[0]
+        if len(pref) > 2:
+            return  remaining_pizza_ids[0], [0,0], np.pi/8
+        
+        t1 = pref[0]
+        angle = (1 - t1) * np.pi
+        dist = 5.9
+        x = dist*np.cos(angle)
+        y = dist*np.sin(angle)
+
+        return remaining_pizza_ids[0], [x,y], np.pi/8

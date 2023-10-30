@@ -3,14 +3,12 @@ import numpy as np
 from typing import Tuple, List
 import constants
 from utils import pizza_calculations
-import math
 
 class Player:
     def __init__(self, num_toppings, rng: np.random.Generator) -> None:
         """Initialise the player"""
         self.rng = rng
         self.num_toppings = num_toppings
-        print("This is team 2.")
 
     def customer_gen(self, num_cust, rng = None):
         
@@ -23,32 +21,10 @@ class Player:
         Returns:
             preferences_total(list) : List of size [num_cust, 2, num_toppings], having all generated customer preferences
         """
-
-        def create_inst(_k):
-            p = []
-            for idx in range(self.num_toppings):
-                item = float("nan")
-                while math.isnan(item):
-                    item = np.random.normal(loc=(24/(2*self.num_toppings)) - k, scale=1)
-                    item = max(min(item, 11.9), 0.1)
-                p.append(item)
-            p = np.array(p)
-            p = 12 * p / np.sum(p)
-            return p
-
+        
         preferences_total = []
         if rng==None:
             for i in range(num_cust):
-                k = np.random.randint(-6,6)
-                # print("k is:", k)
-                preferences_1 = create_inst(k)
-                preferences_2 = create_inst(k)
-                preferences = [preferences_1, preferences_2]
-                equal_prob = self.rng.random()
-                if equal_prob <= 0.0:
-                    preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
-                preferences_total.append(preferences)
-                """
                 preferences_1 = self.rng.random((self.num_toppings,))
                 preferences_1 = 12*preferences_1/np.sum(preferences_1)
                 preferences_2 = self.rng.random((self.num_toppings,))
@@ -58,25 +34,17 @@ class Player:
                 if equal_prob <= 0.0:
                     preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
                 preferences_total.append(preferences)
-                """
         else : 
             for i in range(num_cust):
-                k = np.random.randint(-6,6)
-                print("k is:", k)
-                preferences_1 = create_inst(k)
-                preferences_2 = create_inst(k)
-                """
                 preferences_1 = rng.random((self.num_toppings,))
                 preferences_1 = 12*preferences_1/np.sum(preferences_1)
                 preferences_2 = rng.random((self.num_toppings,))
                 preferences_2 = 12*preferences_2/np.sum(preferences_2)
-                """
                 preferences = [preferences_1, preferences_2]
                 equal_prob = rng.random()
                 if equal_prob <= 0.0:       #change this if you want toppings to show up
                     preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
-                preferences_total.append(preferences)
-        # print("Preference total", preferences_total)
+                preferences_total.append(preferences) 
         return preferences_total
 
         

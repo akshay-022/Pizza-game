@@ -66,6 +66,7 @@ class gui():
             elif player_px == 1:
                 self.player_instance = p1(self.num_toppings, self.rng)
             elif player_px == 2:
+                # print("initialising player 2")
                 self.player_instance = p2(self.num_toppings, self.rng)
             elif player_px == 3:
                 self.player_instance = p3(self.num_toppings, self.rng)
@@ -308,6 +309,7 @@ class gui():
         self.update_indicator = 1
         self.type_player = self.type_p.get() 
         self.num_player = self.options_player.index(self.type_player) - 1
+        # print("self.num_player", self.num_player)
         self.num_toppings = int(self.num_p.get())
         self.all_player_instances = [ default_player(self.num_toppings, self.rng), p1(self.num_toppings, self.rng), p2(self.num_toppings, self.rng), p3(self.num_toppings, self.rng), p4(self.num_toppings, self.rng), p5(self.num_toppings, self.rng), p6(self.num_toppings, self.rng)]
         #self.preferences = np.zeros((constants.number_of_initial_pizzas, 2, self.num_toppings))
