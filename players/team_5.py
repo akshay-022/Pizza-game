@@ -61,9 +61,11 @@ class Player:
         print(pizzas)
         return list(pizzas)
 
-    def _draw_topping(self, angle_start, angle_end, amount, category):
+    def _draw_topping(self, angle_start, angle_end, amount, category, r = None):
         theta = (angle_end-angle_start)/(2*amount)
         radius = self.BUFFER + 0.375/sin(theta)
+        if r is not None:
+            radius = max(radius, r)
         return [[radius*cos(angle_start+(2*i+1)*theta), radius*sin(angle_start+(2*i+1)*theta), category] for i in range(amount)]
 
     def _get_topping_2(self, preferences):
@@ -84,9 +86,14 @@ class Player:
         return [pizza] * 10
 
     def _get_topping_4(self, preferences):
-        inner_radius = self.BUFFER + 0.375 / sin(pi / 12)
-        outer_radius = self.BUFFER + 0.375 / sin(pi / 24) # might need to make it bigger to have more flexibility
-        return self._get_topping_default(preferences)
+        inner = self._draw_topping(0, pi, 2, 1) +\
+                self._draw_topping(pi, 2*pi, 2, 2)
+        outer = self._draw_topping(0, pi, 4, 1, 1.22) +\
+                self._draw_topping(pi, 2*pi, 4, 2, 1.22)
+        arc = self._draw_topping(0, 0.5*pi, 6, 3, 4) +\
+              self._draw_topping(0.5*pi, pi, 6, 4, 4)
+        pizza = inner + outer + arc
+        return [pizza] * 10
 
     def choose_toppings(self, preferences):
         """Function in which we choose position of toppings
