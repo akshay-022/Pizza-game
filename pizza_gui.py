@@ -425,7 +425,7 @@ class gui():
 
     def see_score(self):
         B, C, U, obtained_preferences, center_offsets, slice_amount_metrics = self.calculator.final_score(self.pizzas, self.pizza_choice_order, self.preferences, self.cuts, self.num_toppings, self.multiplier, self.x, self.y)
-        list_scores = [('Customer Number', "Pizza Number", "U", "B", "C", "S , Center offset, Slice metric")]
+        list_scores = [('Customer Number', "Pizza Number", "U", "B", "C", "S" , "Center offsets", "Slice metric")]
         with open("summary_log_gui.txt", "w") as f:
             U_total = 0
             B_total = 0
@@ -475,7 +475,7 @@ class gui():
                 f.write('\n')
                 f.write('\n')
                 #list_scores.append((str(i+1), str(pizza_id), str(np.round(U[i].sum(), 2)), str(np.round(B[i].sum(), 2)), str(np.round(C[i].sum(), 2 )), str(np.round((B[i] - C[i]).sum(), 2))))
-                list_scores.append((str(i+1), str(pizza_id), str(np.round(U[i].sum(), 2)), str(np.round(B[i].sum(), 2)), str(np.round(C[i].sum(), 2 )), str(np.round((np.sum(B[i], axis = 1) - np.sum(C[i], axis = 1)).sum(), 2)),  str(center_offsets[i]),  str(slice_amount_metrics[i])   ))
+                list_scores.append((str(i+1), str(pizza_id), str(np.round(U[i].sum(), 2)), str(np.round(B[i].sum(), 2)), str(np.round(C[i].sum(), 2 )), str(np.round((np.sum(B[i], axis = 1) - np.sum(C[i], axis = 1)).sum(), 2)),  str(np.round(center_offsets[i], 2)),  str(np.round(slice_amount_metrics[i], 2)  )))
             f.write("Total Score U : " + str(U_total))
             f.write('\n')
             f.write("Total score B : " + str(B_total))
@@ -494,16 +494,16 @@ class gui():
         for i in range(constants.number_of_initial_pizzas + 1):
             for j in range(8):
                 if i==1:
-                    self.e = Entry(self.root_1, width=30, fg='black',
+                    self.e = Entry(self.root_1, width=20, fg='black',
                                 font=('Arial',16,'bold'))
                 elif i==2:
-                    self.e = Entry(self.root_1, width=30, fg='black',
+                    self.e = Entry(self.root_1, width=20, fg='black',
                                 font=('Arial',16,'bold'))
                 elif i==3:
-                    self.e = Entry(self.root_1, width=30, fg='black',
+                    self.e = Entry(self.root_1, width=20, fg='black',
                                 font=('Arial',16,'bold'))
                 else:
-                    self.e = Entry(self.root_1, width=30, fg='black',
+                    self.e = Entry(self.root_1, width=20, fg='black',
                                 font=('Arial',16,'bold'))
                 self.e.grid(row=i, column=j)
                 self.e.insert(END, list_scores[i][j])
