@@ -4,6 +4,7 @@ from typing import Tuple, List
 from utils import pizza_calculations
 
 import numpy as np
+from itertools import permutations
 from math import pi, sin, cos, tan, sqrt
 
 
@@ -77,26 +78,30 @@ class Player:
         return [pizza] * 10
 
     def _get_topping_3(self, preferences):
-        inner = self._draw_topping(0, pi, 2, 1) +\
-                self._draw_topping(pi, 2*pi, 2, 2)
-        outer = self._draw_topping(0, pi, 6, 1) +\
-                self._draw_topping(pi, 2*pi, 6, 2)
-        arc = self._draw_topping(0.25*pi, 0.75*pi, 8, 3)
-        pizza = inner + outer + arc
-        return [pizza] * 10
+        def helper(categories):
+            inner = self._draw_topping(0, pi, 2, categories[0]) +\
+                    self._draw_topping(pi, 2*pi, 2, categories[1])
+            outer = self._draw_topping(0, pi, 6, categories[0]) +\
+                    self._draw_topping(pi, 2*pi, 6, categories[1])
+            arc = self._draw_topping(0.25*pi, 0.75*pi, 8, categories[2])
+            return inner + outer + arc
+        perms = list(permutations([1,2,3]))*2
+        return [helper(perm) for perm in perms[0:10]]
 
     def _get_topping_4(self, preferences):
-        inner = self._draw_topping(0, pi, 2, 1) +\
-                self._draw_topping(pi, 2*pi, 2, 2)
-        outer = self._draw_topping(0, pi, 4, 1, 1.22) +\
-                self._draw_topping(pi, 2*pi, 4, 2, 1.22)
-        # 1.22 drived as below:
-        # https://www.symbolab.com/solver?or=gms&query=%28x*cos%28pi%2F8%29-0.375%29%5E2+%2B+%28x*sin%28pi%2F8%29-0.375%29%5E2+%3D+0.75%5E2
-        arc = self._draw_topping(0, 0.5*pi, 6, 3, 4) +\
-              self._draw_topping(0.5*pi, pi, 6, 4, 4)
-        # used 4 to move the arc outer. may wanna change this.
-        pizza = inner + outer + arc
-        return [pizza] * 10
+        def helper(categories):
+            inner = self._draw_topping(0, pi, 2, categories[0]) +\
+                    self._draw_topping(pi, 2*pi, 2, categories[1])
+            outer = self._draw_topping(0, pi, 4, categories[0], 1.22) +\
+                    self._draw_topping(pi, 2*pi, 4, categories[1], 1.22)
+            # 1.22 drived as below:
+            # https://www.symbolab.com/solver?or=gms&query=%28x*cos%28pi%2F8%29-0.375%29%5E2+%2B+%28x*sin%28pi%2F8%29-0.375%29%5E2+%3D+0.75%5E2
+            arc = self._draw_topping(0, 0.5*pi, 6, categories[2], 4) +\
+                self._draw_topping(0.5*pi, pi, 6, categories[3], 4)
+            # used 4 to move the arc outer. may wanna change this.
+            return inner + outer + arc
+        perms = list(permutations([1,2,3,4]))
+        return [helper(perm) for perm in perms[0:10]]
 
     def choose_toppings(self, preferences):
         """Function in which we choose position of toppings
