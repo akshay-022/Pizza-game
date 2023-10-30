@@ -61,24 +61,27 @@ class Player:
         print(pizzas)
         return list(pizzas)
 
-    def _topping_coords(self, angle_start, angle_end, amount, category):
+    def _draw_topping(self, angle_start, angle_end, amount, category):
         theta = (angle_end-angle_start)/(2*amount)
         radius = self.BUFFER + 0.375/sin(theta)
         return [[radius*cos(angle_start+(2*i+1)*theta), radius*sin(angle_start+(2*i+1)*theta), category] for i in range(amount)]
-        
 
     def _get_topping_2(self, preferences):
-        inner = self._topping_coords(0, pi, 4, 1) +\
-                self._topping_coords(pi, 2*pi, 4, 2)
-        outer = self._topping_coords(0, pi, 8, 1) +\
-                self._topping_coords(pi, 2*pi, 8, 2)
+        inner = self._draw_topping(0, pi, 4, 1) +\
+                self._draw_topping(pi, 2*pi, 4, 2)
+        outer = self._draw_topping(0, pi, 8, 1) +\
+                self._draw_topping(pi, 2*pi, 8, 2)
         pizza = inner + outer
         return [pizza] * 10
 
     def _get_topping_3(self, preferences):
-        inner_radius = self.BUFFER + 0.375 / sin(pi / 16)
-        outer_radius = self.BUFFER + 0.375 / sin(pi / 32)
-        return self._get_topping_default(preferences)
+        inner = self._draw_topping(0, pi, 2, 1) +\
+                self._draw_topping(pi, 2*pi, 2, 2)
+        outer = self._draw_topping(0, pi, 6, 1) +\
+                self._draw_topping(pi, 2*pi, 6, 2)
+        arc = self._draw_topping(0.25*pi, 0.75*pi, 8, 3)
+        pizza = inner + outer + arc
+        return [pizza] * 10
 
     def _get_topping_4(self, preferences):
         inner_radius = self.BUFFER + 0.375 / sin(pi / 12)
