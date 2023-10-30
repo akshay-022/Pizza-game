@@ -90,6 +90,8 @@ class Player:
                 self._draw_topping(pi, 2*pi, 2, 2)
         outer = self._draw_topping(0, pi, 4, 1, 1.22) +\
                 self._draw_topping(pi, 2*pi, 4, 2, 1.22)
+        # 1.22 drived as below:
+        # https://www.symbolab.com/solver?or=gms&query=%28x*cos%28pi%2F8%29-0.375%29%5E2+%2B+%28x*sin%28pi%2F8%29-0.375%29%5E2+%3D+0.75%5E2
         arc = self._draw_topping(0, 0.5*pi, 6, 3, 4) +\
               self._draw_topping(0.5*pi, pi, 6, 4, 4)
         pizza = inner + outer + arc
