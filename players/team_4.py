@@ -62,41 +62,34 @@ class Player:
             pizzas(list) : List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping center, y coordinate of topping center, topping number of topping(1/2/3/4) (Note that it starts from 1, not 0)]
         """
         
-        x_coords = [np.sin(np.pi/2)]
         pizzas = np.zeros((10, 24, 3))
-        for j in range(constants.number_of_initial_pizzas):
-            pizza_indiv = np.zeros((24,3))
-            i = 0
-            while i<24:
-                angle = i * (2 * np.pi / 11) # self.rng.random()*2*np.pi
-                dist = 5.0 - (i*0.14) # self.rng.random()*6
-                x = dist * np.cos(angle)
-                y = dist * np.sin(angle)
-                clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
-                if not clash_exists:
-                    pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
-                    i = i+1
-            pizza_indiv = np.array(pizza_indiv)
-            pizzas[j] = pizza_indiv
-        return list(pizzas)
 
-        pizzas = np.zeros((10, 24, 3))
-        for j in range(constants.number_of_initial_pizzas):
-            pizza_indiv = np.zeros((24, 3))
-            topping_counts = [0] * self.num_toppings
-            i = 0
-            while i < 24:
-                angle = i * (2 * np.pi / 24)
-                dist = 6.0
-                x = dist * np.cos(angle)
-                y = dist * np.sin(angle)
-                topping_num = topping_counts.index(min(topping_counts)) + 1
-                pizza_indiv[i] = [x, y, topping_num]
-                topping_counts[topping_num - 1] += 1
-                clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
-                if not clash_exists:
-                    pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
-                    i = i+1
+        if num_toppings == 2:
+            for j in range(constants.number_of_initial_pizzas):
+                pizza_indiv = np.zeros((24,3))
+                for i in range(24):
+                    angle = (i * np.pi / 12) + np.pi / 24
+                    dist = 3.0
+                    x = dist * np.cos(angle)
+                    y = dist * np.sin(angle)
+                    pizza_indiv[i] = [x, y, (i/12) + 1]
+                pizza_indiv = np.array(pizza_indiv)
+                pizzas[j] = pizza_indiv
+        else:
+            for j in range(constants.number_of_initial_pizzas):
+                        pizza_indiv = np.zeros((24,3))
+                        i = 0
+                        while i<24:
+                            angle = self.rng.random()*2*np.pi
+                            dist = self.rng.random()*6
+                            x = dist*np.cos(angle)
+                            y = dist*np.sin(angle)
+                            clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
+                            if not clash_exists:
+                                pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
+                                i = i+1
+                        pizza_indiv = np.array(pizza_indiv)
+                        pizzas[j] = pizza_indiv
 
         return list(pizzas)
 
@@ -114,4 +107,14 @@ class Player:
             Tuple[int, center, first cut angle]: Return the pizza id you choose, the center of the cut in format [x_coord, y_coord] where both are in inches relative of pizza center of radius 6, the angle of the first cut in radians. 
         """
         pizza_id = remaining_pizza_ids[0]
-        return  remaining_pizza_ids[0], [0,0], np.pi/8
+        pref = customer_amounts[0]
+        if len(pref) > 2:
+            return  remaining_pizza_ids[0], [0,0], np.pi/8
+        
+        t1 = pref[0]
+        angle = (1 - t1) * np.pi
+        dist = 5.9
+        x = dist*np.cos(angle)
+        y = dist*np.sin(angle)
+
+        return remaining_pizza_ids[0], [x,y], np.pi/8
