@@ -92,7 +92,7 @@ class no_gui():
                 self.auto_player = default_player(self.num_toppings, self.rng)
 
     def see_score(self):
-        B, C, U, obtained_preferences = self.calculator.final_score(self.pizzas, self.pizza_choice_order, self.preferences, self.cuts, self.num_toppings, self.multiplier, self.x, self.y)
+        B, C, U, obtained_preferences, center_offsets, slice_amount_metrics = self.calculator.final_score(self.pizzas, self.pizza_choice_order, self.preferences, self.cuts, self.num_toppings, self.multiplier, self.x, self.y)
         with open("summary_log_nogui.txt", "w") as f:
             U_total = 0
             B_total = 0
@@ -108,6 +108,8 @@ class no_gui():
                 f.write("Pizza " + str(pizza_id))
                 f.write('\n')
                 f.write("Cut at (" + str((self.cuts[pizza_id][0]-self.x)/self.multiplier) + ", " + str((self.cuts[pizza_id][1]-self.y)/self.multiplier) + ") and angle " + str(self.cuts[pizza_id][2]) + "radians.")
+                f.write('\n')
+                f.write("Center offset : " + str(center_offsets[i]))
                 f.write('\n')
                 for j in range(24):
                     f.write("Topping " + str(self.pizzas[pizza_id][j][2]) + " at (" + str(self.pizzas[pizza_id][j][0]) + "," + str(self.pizzas[pizza_id][j][1]) + ")")
@@ -136,11 +138,13 @@ class no_gui():
                 f.write('\n')
                 f.write("Obtained Preferences : " + str(obtained_preferences[i]))
                 f.write('\n')
+                f.write("Slice by slice amount differences sum : " + str(slice_amount_metrics[i]))
                 f.write('\n')
                 f.write('\n')
-                print(f"Customer {str(i+1)}, pizza {str(pizza_id)}, U = {str(np.round(U[i].sum(), 2))}, B = {str(np.round(B[i].sum(), 2))}, C = {str(np.round(C[i].sum(), 2 ))}, S = {str(np.round((np.sum(B[i], axis = 1) - np.sum(C[i], axis = 1)).sum(), 2))}")
+                f.write('\n')
+                print(f"Customer {str(i+1)}, pizza {str(pizza_id)}, U = {str(np.round(U[i].sum(), 2))}, B = {str(np.round(B[i].sum(), 2))}, C = {str(np.round(C[i].sum(), 2 ))}, S = {str(np.round((np.sum(B[i], axis = 1) - np.sum(C[i], axis = 1)).sum(), 2))}, SliceMetric = {str(slice_amount_metrics[i])}, CenterOffset = {str(center_offsets[i])}")
                 written_cut = [((self.cuts[pizza_id][0]-self.x)/self.multiplier), ((self.cuts[pizza_id][1]-self.y)/self.multiplier), (self.cuts[pizza_id][2])]
-                result = {"Customer": i+1, "Cut" : written_cut ,"Pizza_id": pizza_id, "U": np.round(U[i].sum(), 2), "B": np.round(B[i].sum(), 2), "C": np.round(C[i].sum(), 2 ), "S": np.round((np.sum(B[i], axis = 1) - np.sum(C[i], axis = 1)).sum(), 2)}
+                result = {"Customer": i+1, "Cut" : written_cut ,"Pizza_id": pizza_id, "U": np.round(U[i].sum(), 2), "B": np.round(B[i].sum(), 2), "C": np.round(C[i].sum(), 2 ), "S": np.round((np.sum(B[i], axis = 1) - np.sum(C[i], axis = 1)).sum(), 2),  "SliceMetric" : slice_amount_metrics[i] , "CenterOffset" : center_offsets[i]}
                 results_run.append(result)
             f.write("Total Score U : " + str(U_total))
             print("Total Score U : " + str(U_total))
@@ -154,8 +158,14 @@ class no_gui():
             f.write("Total score S : " + str(S_total))
             print("Total score S : " + str(S_total))
             f.write('\n')
+            f.write("Total Slice by slice metric : " + str(np.sum(slice_amount_metrics)))
+            print("Total Slice by slice metric : " + str(np.sum(slice_amount_metrics)))
             f.write('\n')
-            results_run.append({"U":U_total, "B":B_total, "C":C_total, "S":S_total})
+            f.write("Total center offsets : " + str(np.sum(center_offsets)))
+            print("Total center offsets : " + str(np.sum(center_offsets)))
+            f.write('\n')
+            f.write('\n')
+            results_run.append({"U":U_total, "B":B_total, "C":C_total, "S":S_total, "SliceMetric": np.sum(slice_amount_metrics), "CenterOffset" : np.sum(center_offsets)})
             if self.is_tournament:
                 with open("tournament_results.pkl", "rb") as fp:
                     a = pkl.load(fp)
@@ -191,7 +201,7 @@ class no_gui():
                 self.pizza_choice_order.append(pizza_id)
                 self.pizza_id = pizza_id
                 self.cuts[pizza_id][0] = (self.x + center[0]*self.multiplier)
-                self.cuts[pizza_id][1] = (self.y + center[1]*self.multiplier)
+                self.cuts[pizza_id][1] = (self.y - center[1]*self.multiplier)
                 self.cuts[pizza_id][2] = theta
             self.see_score()
 

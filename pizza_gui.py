@@ -123,7 +123,7 @@ class gui():
             color_top = "yellow"
         #Code to ensure no clashes
         x_relative = (x_coord - self.x)/self.multiplier
-        y_relative = (y_coord - self.y)/self.multiplier
+        y_relative = -(y_coord - self.y)/self.multiplier
         pizza = self.pizzas[self.pizza_id]
         clash_exists = pizza_calculations.clash_exists(x_relative, y_relative, pizza, self.topping_id)
         if clash_exists:
@@ -131,7 +131,7 @@ class gui():
         else : 
             self.canvas.create_oval(x_coord - (0.375*self.multiplier), y_coord - (0.375*self.multiplier), x_coord + (0.375*self.multiplier), y_coord + (0.375*self.multiplier), fill = color_top)
             self.pizzas[self.pizza_id][self.topping_id][0] = (x_coord - self.x)/self.multiplier
-            self.pizzas[self.pizza_id][self.topping_id][1] = (y_coord - self.y)/self.multiplier
+            self.pizzas[self.pizza_id][self.topping_id][1] = -(y_coord - self.y)/self.multiplier
             self.pizzas[self.pizza_id][self.topping_id][2] = topping_number
             self.topping_id = self.topping_id + 1   #Used to track overall which toppings should be shown on a single pizza
             self.label.config( text = "Make pizza number "+str(self.pizza_id)+ " with type "+str(topping_number)+ " of topping and "+ str(24-self.topping_id) + " toppings left.")
@@ -177,25 +177,27 @@ class gui():
         if x_coord == piz_center[0]:
             thetaabs = 0
         else:
-            thetaabs = np.arctan((y_coord - piz_center[1])/(x_coord - piz_center[0]))
+            thetaabs = np.arctan(-(y_coord - piz_center[1])/(x_coord - piz_center[0]))
+            if (x_coord - piz_center[0]) <= 0:
+                thetaabs = thetaabs + np.pi
         if self.x == piz_center[0]:
             centangle = 0
         else:
-            centangle = np.arctan((piz_center[1] - self.y) / (piz_center[0]-self.x))
+            centangle = np.arctan(-(piz_center[1] - self.y) / (piz_center[0]-self.x))
         theta = (centangle - thetaabs)
         self.cuts[self.pizza_id][2] = thetaabs
         for i in range(8):
             if i==0 or i==4:
-                self.draw_cuts(piz_center, theta+i*np.pi/4, color = "yellow")
+                self.draw_cuts(piz_center, thetaabs+i*np.pi/4, color = "yellow")
             else:
-                self.draw_cuts(piz_center, theta+i*np.pi/4)
+                self.draw_cuts(piz_center, thetaabs+i*np.pi/4)
         self.click_indic = self.click_indic + 1
         self.canvas.unbind("<Button-1>")
         #Create a label stating results
-        results = self.calculator.ratio_calculator(self.pizzas[self.pizza_id], self.cuts[self.pizza_id], self.num_toppings, self.multiplier, self.x, self.y )
+        results, temp = self.calculator.ratio_calculator(self.pizzas[self.pizza_id], self.cuts[self.pizza_id], self.num_toppings, self.multiplier, self.x, self.y )
         self.final_preferences.append(results)
         self.pizza_choice_order.append(self.pizza_id)
-        self.label.config( text = "Preferences are : "+ str(self.preferences[self.customer_id]) +". Results are " + str(results) + ".")
+        self.label.config( text = "Preferences are : "+ str(np.round(self.preferences[self.customer_id])) +". Results are " + str(np.round(results,2)) + ".")
         #create a button to go next
         game_over_indic = 1
         for i in range(len(self.cuts)):
@@ -222,7 +224,7 @@ class gui():
                     color_top = "red"
                 elif pizza_top_i[2] == 4:
                     color_top = "yellow"
-                self.canvas.create_oval(self.x + pizza_top_i[0]*self.multiplier - (0.375*self.multiplier), self.y + pizza_top_i[1]*self.multiplier - (0.375*self.multiplier), self.x + pizza_top_i[0]*self.multiplier + (0.375*self.multiplier), self.y + pizza_top_i[1]*self.multiplier + (0.375*self.multiplier), fill = color_top)
+                self.canvas.create_oval(self.x + pizza_top_i[0]*self.multiplier - (0.375*self.multiplier), self.y - pizza_top_i[1]*self.multiplier - (0.375*self.multiplier), self.x + pizza_top_i[0]*self.multiplier + (0.375*self.multiplier), self.y - pizza_top_i[1]*self.multiplier + (0.375*self.multiplier), fill = color_top)
 
     def draw_pizzas(self):
         self.canvas.delete('all')
@@ -244,7 +246,7 @@ class gui():
                         color_top = "red"
                     elif pizza_top_i[2] == 4:
                         color_top = "yellow"
-                    self.canvas.create_oval(self.template_adjustor + x_small + pizza_top_i[0]*multiplier_small - (0.375*multiplier_small), -self.template_adjustor + y_small + pizza_top_i[1]*multiplier_small - (0.375*multiplier_small), self.template_adjustor + x_small + pizza_top_i[0]*multiplier_small + (0.375*multiplier_small), -self.template_adjustor + y_small + pizza_top_i[1]*multiplier_small + (0.375*multiplier_small), fill = color_top)
+                    self.canvas.create_oval(self.template_adjustor + x_small + pizza_top_i[0]*multiplier_small - (0.375*multiplier_small), -self.template_adjustor + y_small - pizza_top_i[1]*multiplier_small - (0.375*multiplier_small), self.template_adjustor + x_small + pizza_top_i[0]*multiplier_small + (0.375*multiplier_small), -self.template_adjustor + y_small - pizza_top_i[1]*multiplier_small + (0.375*multiplier_small), fill = color_top)
             self.canvas.create_text(self.template_adjustor + x_small, -self.template_adjustor + y_small + 7*multiplier_small , text=str(pizza_id), fill="black", font=('Helvetica 15 bold'))
 
     def auto_pizza(self):
@@ -270,24 +272,25 @@ class gui():
         if center[0] == self.x:
             angle_centerline = 0
         else:
-            angle_centerline = math.atan((center[1] - self.y)/(center[0] - self.x))
-        sinin_1 = math.asin(math.sin(theta) * dist_centers/(self.multiplier*6))
-        phi_1 = theta - sinin_1
-        phi_2 = theta - math.pi + sinin_1
-        if math.sin(theta)==0:
-            point_1 = [self.x + 6*self.multiplier*math.cos(angle_centerline)  ,  self.y + 6*self.multiplier*math.sin(angle_centerline)]
-            point_2 = [self.x - 6*self.multiplier*math.cos(angle_centerline)  ,  self.y - 6*self.multiplier*math.sin(angle_centerline)]
+            angle_centerline = math.atan(- (center[1] - self.y)/(center[0] - self.x))
+        theta_diag = angle_centerline - theta
+        sinin_1 = math.asin(math.sin(theta_diag) * dist_centers/(self.multiplier*6))
+        phi_1 = theta_diag - sinin_1
+        phi_2 = theta_diag - math.pi + sinin_1
+        if math.sin(theta_diag)==0:
+            point_1 = [self.x + 6*self.multiplier*math.cos(angle_centerline)  ,  self.y - 6*self.multiplier*math.sin(angle_centerline)]
+            point_2 = [self.x - 6*self.multiplier*math.cos(angle_centerline)  ,  self.y + 6*self.multiplier*math.sin(angle_centerline)]
         else:
-            y1 = self.multiplier*6*math.sin(phi_1)/math.sin(theta)
-            y2 = self.multiplier*6*math.sin(phi_2)/math.sin(theta)
+            y1 = self.multiplier*6*math.sin(phi_1)/math.sin(theta_diag)
+            y2 = self.multiplier*6*math.sin(phi_2)/math.sin(theta_diag)
             #point_1 = [center[0] - y1*math.sin(theta + angle_centerline) , center[1] - y1*math.cos(theta + angle_centerline)]
             #point_2 = [center[0] - y2*math.sin(theta + angle_centerline) , center[1] - y2*math.cos(theta + angle_centerline)]
             if center[0] < self.x:
-                point_1 = [center[0] - y1*math.cos(angle_centerline - theta) , center[1] - y1*math.sin(angle_centerline - theta)]
-                point_2 = [center[0] - y2*math.cos(angle_centerline - theta) , center[1] - y2*math.sin(angle_centerline - theta)]
+                point_1 = [center[0] - y1*math.cos(angle_centerline - theta_diag) , center[1] + y1*math.sin(angle_centerline - theta_diag)]
+                point_2 = [center[0] - y2*math.cos(angle_centerline - theta_diag) , center[1] + y2*math.sin(angle_centerline - theta_diag)]
             else:
-                point_1 = [center[0] + y1*math.cos(angle_centerline - theta) , center[1] + y1*math.sin(angle_centerline - theta)]
-                point_2 = [center[0] + y2*math.cos(angle_centerline - theta) , center[1] + y2*math.sin(angle_centerline - theta)]
+                point_1 = [center[0] + y1*math.cos(angle_centerline - theta_diag) , center[1] - y1*math.sin(angle_centerline - theta_diag)]
+                point_2 = [center[0] + y2*math.cos(angle_centerline - theta_diag) , center[1] - y2*math.sin(angle_centerline - theta_diag)]
         self.canvas.create_line(point_1[0],point_1[1], point_2[0], point_2[1], fill = color)
 
     def create_pizza(self):
@@ -383,7 +386,7 @@ class gui():
         pizza_id, center, theta = self.player_instance.choose_and_cut(self.pizzas, options_pizza, self.preferences[self.customer_id])
         self.pizza_id = pizza_id
         self.cuts[pizza_id][0] = (self.x + center[0]*self.multiplier)
-        self.cuts[pizza_id][1] = (self.y + center[1]*self.multiplier)
+        self.cuts[pizza_id][1] = (self.y - center[1]*self.multiplier)
         self.cuts[pizza_id][2] = theta
         self.draw_pizza(pizza_id)
         for i in range(8):
@@ -400,9 +403,9 @@ class gui():
         if game_over_indic == 0:
             self.button = Button( self.root , text = "Next Customer" , command = self.pizza_choice)
             self.button.place(x=153, y=20)
-            results = self.calculator.ratio_calculator(self.pizzas[pizza_id], self.cuts[pizza_id], self.num_toppings, self.multiplier, self.x, self.y )
+            results, temp = self.calculator.ratio_calculator(self.pizzas[pizza_id], self.cuts[pizza_id], self.num_toppings, self.multiplier, self.x, self.y )
             self.final_preferences.append(results)
-            self.label.config( text = "Pizza chosen "+  str(pizza_id) +". Customer preferences : "+str(self.preferences[self.customer_id])+ ". Obtained preferences : "+str(results))
+            self.label.config( text = "Pizza chosen "+  str(pizza_id) +". Customer preferences : "+str(np.round(self.preferences[self.customer_id], 2))+ ". Obtained preferences : "+str(np.round(results, 2)))
         else:
             self.button = Button( self.root , text = "See results" , command = self.see_score)
             self.button.place(x=153, y=20)
@@ -421,8 +424,8 @@ class gui():
             self.canvas.bind("<Button-1>", self.clickevent_cut)
 
     def see_score(self):
-        B, C, U, obtained_preferences = self.calculator.final_score(self.pizzas, self.pizza_choice_order, self.preferences, self.cuts, self.num_toppings, self.multiplier, self.x, self.y)
-        list_scores = [('Customer Number', "Pizza Number", "U", "B", "C", "S (Score)")]
+        B, C, U, obtained_preferences, center_offsets, slice_amount_metrics = self.calculator.final_score(self.pizzas, self.pizza_choice_order, self.preferences, self.cuts, self.num_toppings, self.multiplier, self.x, self.y)
+        list_scores = [('Customer Number', "Pizza Number", "U", "B", "C", "S , Center offset, Slice metric")]
         with open("summary_log_gui.txt", "w") as f:
             U_total = 0
             B_total = 0
@@ -437,6 +440,8 @@ class gui():
                 f.write("Pizza " + str(pizza_id))
                 f.write('\n')
                 f.write("Cut at (" + str((self.cuts[pizza_id][0]-self.x)/self.multiplier) + ", " + str((self.cuts[pizza_id][1]-self.y)/self.multiplier) + ") and angle " + str(self.cuts[pizza_id][2]) + "radians.")
+                f.write('\n')
+                f.write("Center offset : " + str(center_offsets[i]))
                 f.write('\n')
                 for j in range(24):
                     f.write("Topping " + str(self.pizzas[pizza_id][j][2]) + " at (" + str(self.pizzas[pizza_id][j][0]) + "," + str(self.pizzas[pizza_id][j][1]) + ")")
@@ -465,10 +470,12 @@ class gui():
                 f.write('\n')
                 f.write("Obtained Preferences : " + str(obtained_preferences[i]))
                 f.write('\n')
+                f.write("Slice by slice amount differences sum : " + str(slice_amount_metrics[i]))
+                f.write('\n')
                 f.write('\n')
                 f.write('\n')
                 #list_scores.append((str(i+1), str(pizza_id), str(np.round(U[i].sum(), 2)), str(np.round(B[i].sum(), 2)), str(np.round(C[i].sum(), 2 )), str(np.round((B[i] - C[i]).sum(), 2))))
-                list_scores.append((str(i+1), str(pizza_id), str(np.round(U[i].sum(), 2)), str(np.round(B[i].sum(), 2)), str(np.round(C[i].sum(), 2 )), str(np.round((np.sum(B[i], axis = 1) - np.sum(C[i], axis = 1)).sum(), 2))))
+                list_scores.append((str(i+1), str(pizza_id), str(np.round(U[i].sum(), 2)), str(np.round(B[i].sum(), 2)), str(np.round(C[i].sum(), 2 )), str(np.round((np.sum(B[i], axis = 1) - np.sum(C[i], axis = 1)).sum(), 2)),  str(center_offsets[i]),  str(slice_amount_metrics[i])   ))
             f.write("Total Score U : " + str(U_total))
             f.write('\n')
             f.write("Total score B : " + str(B_total))
@@ -477,11 +484,15 @@ class gui():
             f.write('\n')
             f.write("Total score S : " + str(S_total))
             f.write('\n')
+            f.write("Total Slice by slice metric : " + str(np.sum(slice_amount_metrics)))
+            f.write('\n')
+            f.write("Total center offsets : " + str(np.sum(center_offsets)))
+            f.write('\n')
             f.write('\n')
         
         self.root_1 = Tkinter.Tk()
         for i in range(constants.number_of_initial_pizzas + 1):
-            for j in range(6):
+            for j in range(8):
                 if i==1:
                     self.e = Entry(self.root_1, width=30, fg='black',
                                 font=('Arial',16,'bold'))
