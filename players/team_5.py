@@ -103,7 +103,7 @@ class Player:
     def _get_cut_2(self, pizzas, remaining_pizza_ids, customer_amounts):
         # not considering non-integer cuts
         angle = customer_amounts[0][0]/12 * pi
-        radius = 6 - self.BUFFER
+        radius = sqrt(2)*(self.BUFFER + 0.375 + 0.375 / sin(pi / 24))
         return remaining_pizza_ids[0], [radius*cos(pi+angle), radius*sin(pi+angle)], angle
 
     def _get_cut_3(self, pizzas, remaining_pizza_ids, customer_amounts):
