@@ -109,7 +109,8 @@ class Player:
             # used 4 to move the arc outer. may wanna change this.
             return inner + outer + arc
         perms = list(permutations([1,2,3,4]))
-        return [helper(perm) for perm in perms[0:10]]
+        # return [helper(perm) for perm in perms[0:10]]
+        return [helper([1,2,3,4]) for perm in range(10)]  # TODO: Use permuted pizzas
 
     def choose_toppings(self, preferences):
         """Function in which we choose position of toppings
@@ -190,7 +191,7 @@ class Player:
         pizza_id = remaining_pizza_ids[0]
         pizza = pizzas[pizza_id]
         angle, _ = self._minimize_error(pizza, (pi, 2 * pi), 5, [0, 1], customer_amounts)
-        radius_range = (self._get_min_cut_radius(8) + self.N4_RADIUS_BUFFER, 6 - self.N4_RADIUS_BUFFER)
+        radius_range = (self._get_min_cut_radius(8) + self.N4_RADIUS_BUFFER, 6 - self.N4_RADIUS_BUFFER)  # TODO: (1.22 + 0.375) * sqrt(2)
         radius, _ = self._minimize_error(pizza, radius_range, angle, [2, 3], customer_amounts)
         # TODO: Try both "diagonal" and "antidiagonal" cuts
         return pizza_id, self._get_interpoint(angle, radius), angle
