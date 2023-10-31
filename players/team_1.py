@@ -11,6 +11,10 @@ class Player:
         """Initialise the player"""
         self.rng = rng
         self.num_toppings = num_toppings
+        self.multiplier=40	# Pizza radius = 6*multiplier units
+        self.xCenter = 12*self.multiplier	# Center Point x of pizza
+        self.yCenter = 10*self.multiplier	# Center Point y of pizza
+        self.calculator = pizza_calculations()
 
     def customer_gen(self, num_cust, rng = None):
         
@@ -156,21 +160,42 @@ class Player:
         Returns:
             Tuple[int, center, first cut angle]: Return the pizza id you choose, the center of the cut in format [x_coord, y_coord] where both are in inches relative of pizza center of radius 6, the angle of the first cut in radians. 
         """
-        pizza_id = remaining_pizza_ids[0]
-        x =  random.uniform(-6, 6)
-        y = self.circleCoordinates(x)
-        return  remaining_pizza_ids[0], [x,y], np.pi/6
+        maximumS = -1000
+        maximumCut = [self.xCenter, self.yCenter, np.pi/6, remaining_pizza_ids[0]] #default cut
 
-    #this function will take in an x and return the other y coordinate from the equation of a circle
-    def circleCoordinates(self, x):
-        positive = random.randint(0, 1) #make y the top half or bottom half of circle
-        y = 0 
-        radius = 6
-        if positive:
-            y = math.sqrt((radius**2) - (x**2))
-        else:
-            y = -(math.sqrt((radius**2) - (x**2)))
-        
+        for pizza_id in remaining_pizza_ids:
+            pizza = pizzas[pizza_id]
+            for radius in range(0, 6): 
+                for x in range(-radius*5, radius*5):
+                    x =  x/5
+                    for ySign in range(-1, 2, 2):
+                        y = self.circleCoordinates(x, ySign, radius)
+                        cut = [x, y, np.pi/6, pizza_id]
+                        
+                        xCord = (self.xCenter + x*self.multiplier)
+                        yCord = (self.yCenter - y*self.multiplier)
+                        obtained_pref, slice_areas_toppings = self.calculator.ratio_calculator(pizza, [xCord, yCord, np.pi/6], self.num_toppings, self.multiplier, self.xCenter, self.yCenter)
+                        obtained_pref = np.array(obtained_pref)
+                        random_pref, temp = self.calculator.ratio_calculator(pizza, [self.xCenter, self.yCenter, self.rng.random()*2*np.pi], self.num_toppings, self.multiplier, self.xCenter, self.yCenter)
+                        random_pref = np.array(random_pref)
+                        required_pref = np.array(customer_amounts)
+                        uniform_pref = np.ones((2, self.num_toppings))*(12/self.num_toppings)
+                        b = np.round(np.absolute(required_pref - uniform_pref), 3)
+                        c = np.round(np.absolute(obtained_pref - required_pref), 3)
+                        u = np.round(np.absolute(random_pref - uniform_pref), 3)
+                        s = (b-c).sum()
+                        if s > maximumS:
+                            maximumS = s
+                            maximumCut = cut           
+        x  = maximumCut[0]
+        y = maximumCut[1]
+        theta = maximumCut[2]
+        pizza_id = maximumCut[3]
+        return  pizza_id, [x,y], theta
+
+    #this function will take in an x, sign of y, radius and return the y coordinate from the equation of a circle
+    def circleCoordinates(self, x, ySign, radius):
+        y = ySign*(math.sqrt((radius**2) - (x**2)))
         return y
 
             
