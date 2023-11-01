@@ -143,11 +143,11 @@ class Player:
         pizza = inner + outer
         return pizza
 
-    def generate_random_distribution(total, num_values):
-        """
-        Generate random distributions of integers that add up to a given total for multiple distributions.
-        We may use this to randomly decide how many of each approach we may use for topping placement
-        """
+    def list_sum_to_total(self, total, num_values):
+        if num_values < 1:
+            raise ValueError("Number of values must be at least 1.")
+        if num_values == 1:
+            return [total]
 
         distribution = []
 
@@ -157,7 +157,7 @@ class Player:
             total -= value
 
         distribution.append(total)
-        random.shuffle(distribution)  # Shuffle the values for randomness
+        random.shuffle(distribution)
 
         return distribution
 
@@ -176,7 +176,17 @@ class Player:
         if self.num_toppings == 2:
 
             # we can use the approach distribution here to decide how many of each approach we want to use
-            # approach_distribution = generate_random_distribution(10, 2)
+            # list sum to total
+            # num_runs_per_approach = self.list_sum_to_total(10, 2)
+            # print(f'num_runs_per_approach: {num_runs_per_approach}')
+            #
+            # pizzas = []
+            # # for i in range(num_runs_per_approach[0]):
+            # #     pizzas.append(self.circle_topping_4_v1(preferences))
+            # # for i in range(num_runs_per_approach[1]):
+            # #     pizzas.append(self.circle_topping_4_v2(preferences))
+            # # return pizzas
+
 
             #arrange 6 in two lines
             #arrange 4 in clusters
@@ -266,11 +276,18 @@ class Player:
         elif self.num_toppings == 4:
 
             """once we have multiple approaches, we can randomly choose which one to use
-            approach_distribution = generate_random_distribution(10, NUM_OF_APPROACHES)
             THEN, we can loop through them for each value in the distribution to generate 10 pizzas"""
 
-            # For now, we have no other approaches for 4 toppings, so we will just use 10 of these
-            return [self.circle_topping_4_v1(preferences)] * 10
+            # For now, we have 2 approaches for 4 toppings. need to manually code for however many approaches we have
+            num_runs_per_approach = self.list_sum_to_total(10, 2)
+            print(f'num_runs_per_approach: {num_runs_per_approach}')
+
+            pizzas = []
+            for i in range(num_runs_per_approach[0]):
+                pizzas.append(self.circle_topping_4_v1(preferences))
+            for i in range(num_runs_per_approach[1]):
+                pizzas.append(self.circle_topping_4_v2(preferences))
+            return pizzas
 
 
     #def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
