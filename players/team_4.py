@@ -188,7 +188,7 @@ class Player:
         if len(pref) == 3:
             return  remaining_pizza_ids[0], [0,0], np.pi/8
         
-        angle = (pref[0] / 12.0) * np.pi
+        angle = (pref[0] / (24 / self.num_toppings)) * np.pi
         dist = 5.999
         x = dist*np.cos(angle)
         y = dist*np.sin(angle)
