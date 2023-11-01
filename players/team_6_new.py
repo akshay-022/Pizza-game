@@ -124,7 +124,7 @@ class Player:
             cut_points = new_cut_points
             self.sequence += 1
             print("Best Cut: " + str(best_cut) + " Best Angle: " + str(best_angle))
-        return current_pizza, best_cut, best_angle
+        return pizza_id, best_cut, best_angle
 
     def get_quadrant_centers(self):
         radius = self.pizza_radius / 2  # Half the pizza radius to get quadrant centers
@@ -427,7 +427,7 @@ class Player:
         B.append(b)
         C.append(c)
         U.append(u)
-        obtained_preferences.append(np.round(obtained_pref, 3))
+        obtained_preferences.append(tuple(np.round(obtained_pref, 3)))
 
         # Extra metrics
         x_offset = (pizza_cut[0] - x) / multiplier
