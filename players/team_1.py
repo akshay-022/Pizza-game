@@ -71,7 +71,7 @@ class Player:
         ]
         return pizza
 
-    def circle_topping_4(self, preferences):
+    def circle_topping_4_v1(self, preferences):
         """
         Return 1 pizza of 12 toppings in an inner circle, split horizontally,
         and 12 in an outer circle, split vertically
@@ -103,6 +103,42 @@ class Player:
                 1+i//6
             ]
             for i in range(12, 24)
+        ]
+        pizza = inner + outer
+        return pizza
+
+    def circle_topping_4_v2(self, preferences):
+        """
+        Return 1 pizza of 12 toppings in an inner circle, split horizontally,
+        and 12 in an outer circle, split vertically
+        """
+
+        # 0.189 (+ buffer) was minimum i could find for the inner circle to NOT overlap for now
+        inner_radius = BUFFER + 0.189 / np.sin(np.pi / 24)
+        outer_radius = BUFFER + 0.375 / np.sin(np.pi / 24)
+
+        theta = np.pi / 12
+
+        # found angle thru testing around unit circle until appeared ~ vertically split
+        outer_angle = 11 * np.pi / 6
+
+        # make a small inner circle, split horizontally
+        inner = [
+            [
+                inner_radius * np.cos((2 * i + 1) * theta),
+                inner_radius * np.sin((2 * i + 1) * theta),
+                1 + i // 6
+            ]
+            for i in range(12,24)
+        ]
+        # make a larger outer circle, split vertically
+        outer = [
+            [
+                outer_radius * np.cos((outer_angle + (2 * i + 1)) * theta),
+                outer_radius * np.sin((outer_angle + (2 * i + 1)) * theta),
+                1 + i // 6
+            ]
+            for i in range(12)
         ]
         pizza = inner + outer
         return pizza
@@ -234,7 +270,7 @@ class Player:
             THEN, we can loop through them for each value in the distribution to generate 10 pizzas"""
 
             # For now, we have no other approaches for 4 toppings, so we will just use 10 of these
-            return [self.circle_topping_4(preferences)] * 10
+            return [self.circle_topping_4_v1(preferences)] * 10
 
 
     #def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
