@@ -6,6 +6,9 @@ from utils import pizza_calculations
 import math
 import random
 
+#constants
+BUFFER = 0.001
+
 class Player:
     def __init__(self, num_toppings, rng: np.random.Generator) -> None:
         """Initialise the player"""
@@ -51,6 +54,76 @@ class Player:
             preferences_total.append(preferences.tolist())
 
         return preferences_total
+    def circle_topping_2(self, preferences):
+        """
+        Return 1 pizza of 24 toppings in a circle, split horizontally
+        """
+        radius = BUFFER + 0.375 / np.sin(np.pi / 24)
+        theta = np.pi / 24
+        angle = 0  # use np.pi/2 to make a vertical half
+        pizza = [
+            [
+                radius * np.cos(angle + (2 * i + 1) * theta),
+                radius * np.sin(angle + (2 * i + 1) * theta),
+                1 + i // 12
+            ]
+            for i in range(24)
+        ]
+        return pizza
+
+    def circle_topping_4(self, preferences):
+        """
+        Return 1 pizza of 12 toppings in an inner circle, split horizontally,
+        and 12 in an outer circle, split vertically
+        """
+
+        #0.189 (+ buffer) was minimum i could find for the inner circle to NOT overlap for now
+        inner_radius = BUFFER + 0.189 / np.sin(np.pi / 24)
+        outer_radius = BUFFER + 0.375 / np.sin(np.pi / 24)
+
+        theta = np.pi / 12
+
+        # found angle thru testing around unit circle until appeared ~ vertically split
+        outer_angle = 11 * np.pi / 6
+
+        # make a small inner circle, split horizontally
+        inner = [
+            [
+                inner_radius*np.cos((2*i+1)*theta),
+                inner_radius*np.sin((2*i+1)*theta),
+                1+i//6
+            ]
+            for i in range(12)
+        ]
+        # make a larger outer circle, split vertically
+        outer = [
+            [
+                outer_radius*np.cos((outer_angle + (2*i+1))*theta),
+                outer_radius*np.sin((outer_angle + (2*i+1))*theta),
+                1+i//6
+            ]
+            for i in range(12, 24)
+        ]
+        pizza = inner + outer
+        return pizza
+
+    def generate_random_distribution(total, num_values):
+        """
+        Generate random distributions of integers that add up to a given total for multiple distributions.
+        We may use this to randomly decide how many of each approach we may use for topping placement
+        """
+
+        distribution = []
+
+        for _ in range(num_values - 1):
+            value = random.randint(0, total)
+            distribution.append(value)
+            total -= value
+
+        distribution.append(total)
+        random.shuffle(distribution)  # Shuffle the values for randomness
+
+        return distribution
 
     #def choose_discard(self, cards: list[str], constraints: list[str]):
     def choose_toppings(self, preferences):
@@ -63,89 +136,105 @@ class Player:
         Returns:
             pizzas(list) : List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping center, y coordinate of topping center, topping number of topping(1/2/3/4) (Note that it starts from 1, not 0)]
         """
+
         if self.num_toppings == 2:
-            #arrange 6 in two lines 
-            #arrange 4 in clusters 
-            #honestly for 2 topping the lines may make more sense 
-            #x_margin = math.sqrt(6**2-4.5**2) #circle geoemetry 
+
+            # we can use the approach distribution here to decide how many of each approach we want to use
+            # approach_distribution = generate_random_distribution(10, 2)
+
+            #arrange 6 in two lines
+            #arrange 4 in clusters
+            #honestly for 2 topping the lines may make more sense
+            #x_margin = math.sqrt(6**2-4.5**2) #circle geoemetry
             #pizzas = np.zeros((10, 24, 3))
             pizzas = []
             pizza = np.zeros((24, 3))
-            x_margin = 1 
-            #new_y_start_change = (6-math.sqrt(35))/2 
+            x_margin = 1
+            #new_y_start_change = (6-math.sqrt(35))/2
             new_y_start_change = .75*6
-            center_size = .375 
-            #now lets find the starting point 
-            x_pos_left = -x_margin - center_size 
-            x_pos_right = x_margin + center_size 
+            center_size = .375
+            #now lets find the starting point
+            x_pos_left = -x_margin - center_size
+            x_pos_right = x_margin + center_size
 
             y_start = new_y_start_change
-            #loop thru a range of 12 where we place all w x-x_margin 
-            #have y start at new_y_start_change and go down .75 each time 
+            #loop thru a range of 12 where we place all w x-x_margin
+            #have y start at new_y_start_change and go down .75 each time
             #pizza = []
             y = y_start
             #for i in range(24):
             for i in range(12):
                 pizza[i][0] = x_pos_left
                 pizza[i][1] = y
-                pizza[i][2] = 1 
+                pizza[i][2] = 1
                 y -= .76 #to move down
                 #print("x_pos left: " + str(x_pos_left) + "and y " + str(y))
             y = y_start
             for j in range(12,24):
                 pizza[j][0] = x_pos_right
                 pizza[j][1] = y
-                pizza[j][2] = 2 
+                pizza[j][2] = 2
                 y -= .76 #to move down
                 #print("x_pos right: " + str(x_pos_right) + "and y " + str(y))
-            
-            '''for topping in pizza: 
+
+            '''for topping in pizza:
                     print("this is x " + str(topping[0]))
                     print("this is y " + str(topping[1]))
                     print("this is id " + str(topping[2]))'''
-            
+
             for x in range(10):
                 pizzas.append(pizza)
 
-            '''for pizza in pizzas: 
-                for topping in pizza: 
+            '''for pizza in pizzas:
+                for topping in pizza:
                     print("this is x " + str(topping[0]))
                     print("this is y " + str(topping[1]))
                     print("this is id " + str(topping[2]))'''
 
             print("using this function")
             return list(pizzas)
-                
 
-            #do the same with x+x_margin and toppin id 2 
 
-            #repeat 10 times to make all 10 pizzas 
+            #do the same with x+x_margin and toppin id 2
 
-            #return list of pizzas 
-        print("using this function oop")
-        x_coords = [np.sin(np.pi/2)]
-        pizzas = np.zeros((10, 24, 3))
-        for j in range(constants.number_of_initial_pizzas):
-            pizza_indiv = np.zeros((24,3))
-            i = 0
-            while i<24:
-                angle = self.rng.random()*2*np.pi
-                dist = self.rng.random()*6
-                x = dist*np.cos(angle)
-                y = dist*np.sin(angle)
-                clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
-                if not clash_exists:
-                    pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
-                    i = i+1
-            pizza_indiv = np.array(pizza_indiv)
-            pizzas[j] = pizza_indiv
-        for pizza in pizzas:
-            for topping in pizza:
-                print("x postion is " + str(topping[0]))
-                print("y postion is " + str(topping[1]))
-        return list(pizzas)
-    
+            #repeat 10 times to make all 10 pizzas
 
+            #return list of pizzas
+
+
+        # DEFAULT FOR 3 TOPPINGS
+        elif self.num_toppings == 3:
+            print("using this function oop")
+            x_coords = [np.sin(np.pi/2)]
+            pizzas = np.zeros((10, 24, 3))
+            for j in range(constants.number_of_initial_pizzas):
+                pizza_indiv = np.zeros((24,3))
+                i = 0
+                while i<24:
+                    angle = self.rng.random()*2*np.pi
+                    dist = self.rng.random()*6
+                    x = dist*np.cos(angle)
+                    y = dist*np.sin(angle)
+                    clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
+                    if not clash_exists:
+                        pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
+                        i = i+1
+                pizza_indiv = np.array(pizza_indiv)
+                pizzas[j] = pizza_indiv
+            for pizza in pizzas:
+                for topping in pizza:
+                    print("x postion is " + str(topping[0]))
+                    print("y postion is " + str(topping[1]))
+            return list(pizzas)
+
+        elif self.num_toppings == 4:
+
+            """once we have multiple approaches, we can randomly choose which one to use
+            approach_distribution = generate_random_distribution(10, NUM_OF_APPROACHES)
+            THEN, we can loop through them for each value in the distribution to generate 10 pizzas"""
+
+            # For now, we have no other approaches for 4 toppings, so we will just use 10 of these
+            return [self.circle_topping_4(preferences)] * 10
 
 
     #def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
@@ -199,5 +288,149 @@ class Player:
         return y
 
             
+    ###############################
 
+    # def create_radial_lines(self, num_lines, radius, angle_offset=0):
+    #     lines = []
+    #     toppings_per_line = num_lines // self.num_toppings
+    #     print(f'toppings per line: {toppings_per_line}')
+    #     # for topping_id in range(1, self.num_toppings + 1):
+    #     # print(f'topping id: {topping_id}')
+    #     for i in range(toppings_per_line):
+    #         angle = (2 * np.pi / toppings_per_line) * i + angle_offset
+    #         x = radius * np.cos(angle)
+    #         y = radius * np.sin(angle)
+    #         lines.append([x, y, topping_id])
+    #
+    #     for i in range(toppings_per_line, 24):
+    #         angle = (2 * np.pi / toppings_per_line) * i + angle_offset
+    #         x = (radius + 1) * np.cos(angle)
+    #         y = (radius + 1) * np.sin(angle)
+    #         lines.append([x, y, topping_id])
+    #
+    #     return lines
+    ##############################
+    # def radial_toppings(self, preferences):
+    #     """
+    #     Function that will place toppings in a radial line pattern
+    #
+    #     Args:
+    #         preferences(list) : List of size 100*2*num_toppings for 100 generated preference pairs(actual amounts) of customers.
+    #
+    #     Return: 1 pizza with radial pattern of toppings
+    #     """
+    #
+    #     # place lines of only one topping in a radial pattern around the center
+    #     if self.num_toppings == 3:
+    #         # need to place them so they are right next to each other and will occupy the full 6in radius
+    #         pizzas = np.zeros((10, 24, 3))
+    #         # constants.number_of_initial_pizzas
+    #         for j in range(1):
+    #             pizza = np.zeros((24, 3))
+    #
+    #             cos = np.cos
+    #             sin = np.sin
+    #             radius = BUFFER  # Start with the buffer distance
+    #             spacing = 0.75  # The desired spacing between points
+    #
+    #             # # Create a list of points with 0 degrees difference between each point
+    #             # pizza = []
+    #
+    #             for i in range(0, 8):
+    #                 angle = 0
+    #                 x = radius * cos(angle)
+    #                 y = radius * sin(angle)
+    #                 topping_id = 1 + i // 8  # Update topping_id based on your requirements
+    #                 pizza[i] = ([x, y, topping_id])
+    #
+    #                 # Increase the radius for the next point
+    #                 radius += spacing
+    #                 # + BUFFER?
+    #
+    #             for i in range(8, 16):
+    #                 angle = 2 * np.pi / 3
+    #                 x = radius * cos(angle)
+    #                 y = radius * sin(angle)
+    #                 topping_id = 1 + i // 8  # Update topping_id based on your requirements
+    #                 pizza[i] = ([x, y, topping_id])
+    #
+    #                 # Increase the radius for the next point
+    #                 radius += spacing
+    #                 # + BUFFER?
+    #
+    #             for i in range(16, 24):
+    #                 angle = 2 * np.pi / 3
+    #                 x = radius * cos(angle)
+    #                 y = radius * sin(angle)
+    #                 topping_id = 1 + i // 8  # Update topping_id based on your requirements
+    #                 pizza[i] = ([x, y, topping_id])
+    #
+    #                 # Increase the radius for the next point
+    #                 radius += spacing
+    #                 # + BUFFER?
+    #             pizza = np.array(pizza)
+    #             pizzas[j] = pizza
+    #
+    #     elif self.num_toppings == 4:
+    #         pizzas = np.zeros((10, 24, 3))
+    #         # constants.number_of_initial_pizzas
+    #         for j in range(constants.number_of_initial_pizzas):
+    #             pizza = np.zeros((24, 3))
+    #             cos = np.cos
+    #             sin = np.sin
+    #             BUFFER = 0  # 0.001
+    #             radius = 0.5  # Start with the buffer distance
+    #             spacing = 0.8  # The desired spacing between points
+    #
+    #             for i in range(0, 6):
+    #                 angle = 0
+    #                 x = radius * cos(angle)
+    #                 y = radius * sin(angle)
+    #                 topping_id = 1  # Update topping_id based on your requirements
+    #                 pizza[i] = [x, y, topping_id]
+    #                 print(f'x: {x}, y: {y}, topping_id: {topping_id}')
+    #                 # Increase the radius for the next point
+    #                 radius += spacing + BUFFER
+    #                 # + BUFFER?
+    #
+    #             for i in range(6, 12):
+    #                 angle = np.pi / 2
+    #                 x = radius * cos(angle)
+    #                 y = radius * sin(angle)
+    #                 topping_id = 2  # Update topping_id based on your requirements
+    #                 pizza[i] = [x, y, topping_id]
+    #                 print(f'x: {x}, y: {y}, topping_id: {topping_id}')
+    #
+    #                 # Increase the radius for the next point
+    #                 radius += spacing + BUFFER
+    #                 # + BUFFER?
+    #
+    #             for i in range(12, 18):
+    #                 angle = np.pi
+    #                 x = radius * cos(angle)
+    #                 y = radius * sin(angle)
+    #                 topping_id = 3  # Update topping_id based on your requirements
+    #                 pizza[i] = [x, y, topping_id]
+    #                 print(f'x: {x}, y: {y}, topping_id: {topping_id}')
+    #
+    #                 # Increase the radius for the next point
+    #                 radius += spacing + BUFFER
+    #                 # + BUFFER?
+    #
+    #             for i in range(18, 24):
+    #                 angle = 3 * np.pi / 2
+    #                 x = radius * cos(angle)
+    #                 y = radius * sin(angle)
+    #                 topping_id = 4  # Update topping_id based on your requirements
+    #                 pizza[i] = [x, y, topping_id]
+    #                 print(f'x: {x}, y: {y}, topping_id: {topping_id}')
+    #
+    #                 # Increase the radius for the next point
+    #                 radius += spacing + BUFFER
+    #
+    #             pizza = np.array(pizza)
+    #             pizzas[j] = pizza
+    #
+    #         return list(pizzas)
+    ###############################
 
