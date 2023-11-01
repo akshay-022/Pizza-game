@@ -100,11 +100,38 @@ class Player:
         return list(pizzas)
 
     def toppings_4(self, prefs):
-        p = list(chain(prefs))
+        arr = np.stack(prefs)
+        corr = np.corrcoef(arr, rowvar=False)
+        idx = np.argsort(corr)
+
+        pizzas = np.zeros((10, 24, 3))
+        for j in range(constants.number_of_initial_pizzas):
+                pizza_indiv = np.zeros((24,3))
+                for i, t in enumerate(reversed(list(idx[0]))):
+                    if not i:
+                        doffset, thoffset = 0, 0
+                    if i == 1:
+                        doffset, thoffset = 1, np.pi / 2
+                    if i == 2:
+                        doffset, thoffset = 1, -(np.pi / 2)
+                    if i == 3:
+                        doffset, thoffset = 0, np.pi
+
+                    for k in range(6):
+                        angle = (k * np.pi / 6) + (np.pi / 12) + thoffset
+                        dist = 1.5 + doffset
+                        x = dist * np.cos(angle)
+                        y = dist * np.sin(angle)
+                        pizza_indiv[6 * i + k] = [x, y, t+1]
+                pizza_indiv = np.array(pizza_indiv)
+                pizzas[j] = pizza_indiv
+
+        return list(pizzas)
+        
 
     def opt_ratio(self, amounts):
         p, q, n = amounts[0], amounts[1], self.num_toppings
-        return np.array([0.5 * (p[i] - q[i]) + 12. / n for i in range(n)]) 
+        return np.array([0.5 * (p[i] - q[i]) + 12 / n for i in range(n)]) 
 
     #def choose_discard(self, cards: list[str], constraints: list[str]):
     def choose_toppings(self, preferences):
@@ -121,7 +148,7 @@ class Player:
         if self.num_toppings == 2:
             return self.toppings_2()
 
-        pref_opt = [opt_ratio(p) for p in preferences]
+        pref_opt = [self.opt_ratio(p) for p in preferences]
         
         if self.num_toppings == 4:
             return self.toppings_4(pref_opt)
@@ -158,12 +185,12 @@ class Player:
         """
         pizza_id = remaining_pizza_ids[0]
         pref = self.opt_ratio(customer_amounts)
-        if len(pref) > 2:
+        if len(pref) == 3:
             return  remaining_pizza_ids[0], [0,0], np.pi/8
         
         angle = (pref[0] / 12.0) * np.pi
         dist = 5.999
-        x = dist*np.cos(np.pi + angle)
-        y = dist*np.sin(np.pi + angle)
+        x = dist*np.cos(angle)
+        y = dist*np.sin(angle)
 
         return remaining_pizza_ids[0], [x,y], angle
