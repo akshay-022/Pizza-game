@@ -143,6 +143,68 @@ class Player:
         pizza = inner + outer
         return pizza
 
+    def lines_topping_2(self, preferences):
+        # arrange 6 in two lines
+        # arrange 4 in clusters
+        # honestly for 2 topping the lines may make more sense
+        # x_margin = math.sqrt(6**2-4.5**2) #circle geoemetry
+        # pizzas = np.zeros((10, 24, 3))
+        pizzas = []
+        pizza = np.zeros((24, 3))
+        x_margin = 1
+        # new_y_start_change = (6-math.sqrt(35))/2
+        new_y_start_change = .75 * 6
+        center_size = .375
+        # now lets find the starting point
+        x_pos_left = -x_margin - center_size
+        x_pos_right = x_margin + center_size
+
+        y_start = new_y_start_change
+        # loop thru a range of 12 where we place all w x-x_margin
+        # have y start at new_y_start_change and go down .75 each time
+        # pizza = []
+        y = y_start
+        # for i in range(24):
+        for i in range(12):
+            pizza[i][0] = x_pos_left
+            pizza[i][1] = y
+            pizza[i][2] = 1
+            y -= .76  # to move down
+            # print("x_pos left: " + str(x_pos_left) + "and y " + str(y))
+        y = y_start
+        for j in range(12, 24):
+            pizza[j][0] = x_pos_right
+            pizza[j][1] = y
+            pizza[j][2] = 2
+            y -= .76  # to move down
+            # print("x_pos right: " + str(x_pos_right) + "and y " + str(y))
+
+        '''for topping in pizza:
+                print("this is x " + str(topping[0]))
+                print("this is y " + str(topping[1]))
+                print("this is id " + str(topping[2]))'''
+
+        #commenting out if we use random choice of number of each algo per pizza
+        # for x in range(10):
+        #     pizzas.append(pizza)
+
+        '''for pizza in pizzas:
+            for topping in pizza:
+                print("this is x " + str(topping[0]))
+                print("this is y " + str(topping[1]))
+                print("this is id " + str(topping[2]))'''
+
+        print("using this function")
+        # return list(pizzas)
+        return pizza
+
+        # do the same with x+x_margin and toppin id 2
+
+        # repeat 10 times to make all 10 pizzas
+
+        # return list of pizzas
+
+
     def list_sum_to_total(self, total, num_values):
         if num_values < 1:
             raise ValueError("Number of values must be at least 1.")
@@ -176,76 +238,20 @@ class Player:
         if self.num_toppings == 2:
 
             # we can use the approach distribution here to decide how many of each approach we want to use
-            # list sum to total
-            # num_runs_per_approach = self.list_sum_to_total(10, 2)
-            # print(f'num_runs_per_approach: {num_runs_per_approach}')
+            # We have 2 algos for now
+            num_runs_per_approach = self.list_sum_to_total(10, 2)
+            print(f'num_runs_per_approach: {num_runs_per_approach}')
             #
-            # pizzas = []
-            # # for i in range(num_runs_per_approach[0]):
-            # #     pizzas.append(self.circle_topping_4_v1(preferences))
-            # # for i in range(num_runs_per_approach[1]):
-            # #     pizzas.append(self.circle_topping_4_v2(preferences))
-            # # return pizzas
-
-
-            #arrange 6 in two lines
-            #arrange 4 in clusters
-            #honestly for 2 topping the lines may make more sense
-            #x_margin = math.sqrt(6**2-4.5**2) #circle geoemetry
-            #pizzas = np.zeros((10, 24, 3))
             pizzas = []
-            pizza = np.zeros((24, 3))
-            x_margin = 1
-            #new_y_start_change = (6-math.sqrt(35))/2
-            new_y_start_change = .75*6
-            center_size = .375
-            #now lets find the starting point
-            x_pos_left = -x_margin - center_size
-            x_pos_right = x_margin + center_size
-
-            y_start = new_y_start_change
-            #loop thru a range of 12 where we place all w x-x_margin
-            #have y start at new_y_start_change and go down .75 each time
-            #pizza = []
-            y = y_start
-            #for i in range(24):
-            for i in range(12):
-                pizza[i][0] = x_pos_left
-                pizza[i][1] = y
-                pizza[i][2] = 1
-                y -= .76 #to move down
-                #print("x_pos left: " + str(x_pos_left) + "and y " + str(y))
-            y = y_start
-            for j in range(12,24):
-                pizza[j][0] = x_pos_right
-                pizza[j][1] = y
-                pizza[j][2] = 2
-                y -= .76 #to move down
-                #print("x_pos right: " + str(x_pos_right) + "and y " + str(y))
-
-            '''for topping in pizza:
-                    print("this is x " + str(topping[0]))
-                    print("this is y " + str(topping[1]))
-                    print("this is id " + str(topping[2]))'''
-
-            for x in range(10):
-                pizzas.append(pizza)
-
-            '''for pizza in pizzas:
-                for topping in pizza:
-                    print("this is x " + str(topping[0]))
-                    print("this is y " + str(topping[1]))
-                    print("this is id " + str(topping[2]))'''
-
-            print("using this function")
-            return list(pizzas)
+            for i in range(num_runs_per_approach[0]):
+                pizzas.append(self.lines_topping_2(preferences))
+            for i in range(num_runs_per_approach[1]):
+                pizzas.append(self.circle_topping_2(preferences))
+            return pizzas
 
 
-            #do the same with x+x_margin and toppin id 2
 
-            #repeat 10 times to make all 10 pizzas
 
-            #return list of pizzas
 
 
         # DEFAULT FOR 3 TOPPINGS
