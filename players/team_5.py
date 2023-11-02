@@ -18,10 +18,11 @@ class Player:
         self.MAX_RADIUS_PAD = 0.1  # how close we will ever try to get to the pizza edge
         self.NUM_BRUTE_SAMPLES = 100
 
-        # TODO: Access these values from GUI (may need TA)
+        # TODO: Access these values from pizza*.py (need TA to expose)
         self.x = 480
         self.y = 400
         self.multiplier = 40
+        self.pizza_calculator = pizza_calculations()
 
     def customer_gen(self, num_cust, rng = None):
         
@@ -143,7 +144,7 @@ class Player:
             self.y - interpoint[1] * self.multiplier,
             angle
         ]
-        topping_counts, _ = pizza_calculations().ratio_calculator(pizza, cut, self.num_toppings, self.multiplier, self.x, self.y)
+        topping_counts, _ = self.pizza_calculator.ratio_calculator(pizza, cut, self.num_toppings, self.multiplier, self.x, self.y)
         return topping_counts
     
     def _get_error(self, pizza, angle, radius, relevant_topping_ids, customer_amounts):
