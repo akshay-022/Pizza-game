@@ -5,8 +5,8 @@ from utils import pizza_calculations
 
 import numpy as np
 from itertools import permutations
-from math import pi, sin, cos, tan, sqrt
-from scipy.optimize import shgo, direct, dual_annealing, differential_evolution, brute
+from math import pi, sin, cos, sqrt
+from scipy.optimize import brute
 
 
 class Player:
@@ -15,7 +15,7 @@ class Player:
         self.rng = rng
         self.num_toppings = num_toppings
         self.BUFFER = 0.001
-        self.N4_RADIUS_BUFFER = 0.4  # TODO: Make min radius calculation more sophisticated so this isn't needed
+        self.MAX_RADIUS_PAD = 0.1  # how close we will ever try to get to the pizza edge
         self.NUM_BRUTE_SAMPLES = 100
 
         # TODO: Access these values from GUI (may need TA)
@@ -171,17 +171,13 @@ class Player:
         minimizer, minimum, _, _ = brute(f, [bounds], Ns=self.NUM_BRUTE_SAMPLES, full_output=True)
         return minimizer, minimum
 
-    def _get_min_cut_radius(self, outer_ring_count):
-        '''Return the cut radius such that it would be tangent to the outer ring of toppings'''
-        return sqrt(2)*(self.BUFFER + 0.375 + 0.375 / sin(pi / outer_ring_count))
-
     def _get_cut_default(self, pizzas, remaining_pizza_ids, customer_amounts):
         return remaining_pizza_ids[0], [0,0], np.random.random()*pi
     
     def _get_cut_2(self, pizzas, remaining_pizza_ids, customer_amounts):
         # not considering non-integer cuts
         angle = customer_amounts[0][0]/12 * pi
-        radius = self._get_min_cut_radius(16)
+        radius = sqrt(2)*(self.BUFFER + 0.375 + 0.375 / sin(pi / 16))
         return remaining_pizza_ids[0], self._get_interpoint(angle, radius), angle
 
     def _get_cut_3(self, pizzas, remaining_pizza_ids, customer_amounts):
@@ -191,7 +187,7 @@ class Player:
         pizza_id = remaining_pizza_ids[0]
         pizza = pizzas[pizza_id]
         angle, _ = self._minimize_error(pizza, (pi, 2 * pi), 5, [0, 1], customer_amounts)
-        radius_range = (self._get_min_cut_radius(8) + self.N4_RADIUS_BUFFER, 6 - self.N4_RADIUS_BUFFER)  # TODO: (1.22 + 0.375) * sqrt(2)
+        radius_range = (sqrt(2) * (1.22 + 0.375), 6 - self.MAX_RADIUS_PAD)
         radius, _ = self._minimize_error(pizza, radius_range, angle, [2, 3], customer_amounts)
         # TODO: Try both "diagonal" and "antidiagonal" cuts
         return pizza_id, self._get_interpoint(angle, radius), angle
