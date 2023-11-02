@@ -12,7 +12,7 @@
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "args": ["-g", "True"]
+            "args": ["-g", "True", "-s10", "2"]
         }
     ]
 }

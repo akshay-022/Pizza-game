@@ -15,8 +15,8 @@ class Player:
         self.rng = rng
         self.num_toppings = num_toppings
         self.BUFFER = 0.001
-        self.MAX_RADIUS_PAD = 0.1  # how close we will ever try to get to the pizza edge
-        self.NUM_BRUTE_SAMPLES = 100
+        self.MAX_RADIUS_PAD = 0.2  # how close we will ever try to get to the pizza edge
+        self.NUM_BRUTE_SAMPLES = 20
 
         # TODO: Access these values from pizza*.py (need TA to expose)
         self.x = 480
@@ -110,8 +110,7 @@ class Player:
             # used 4 to move the arc outer. may wanna change this.
             return inner + outer + arc
         perms = list(permutations([1,2,3,4]))
-        # return [helper(perm) for perm in perms[0:10]]
-        return [helper([1,2,3,4]) for perm in range(10)]  # TODO: Use permuted pizzas
+        return [helper(perm) for perm in perms[0:10]]
 
     def choose_toppings(self, preferences):
         """Function in which we choose position of toppings
@@ -162,13 +161,12 @@ class Player:
         Only the error for the relevant toppings are included in the error sum.
         One of angle/radius is a (start, end) tuple, the other is a number.
         '''
-        h = lambda x: np.squeeze(np.array(x))[()]  # convert 1.5 or array([1.5]) to 1.5
         if isinstance(angle, tuple):
             bounds = angle
-            f = lambda x: self._get_error(pizza, h(x), radius, relevant_topping_ids, customer_amounts, flipped)
+            f = lambda x: self._get_error(pizza, np.squeeze(x)[()], radius, relevant_topping_ids, customer_amounts, flipped)
         else:
             bounds = radius
-            f = lambda x: self._get_error(pizza, angle, h(x), relevant_topping_ids, customer_amounts, flipped)
+            f = lambda x: self._get_error(pizza, angle, np.squeeze(x)[()], relevant_topping_ids, customer_amounts, flipped)
         minimizer, minimum, _, _ = brute(f, [bounds], Ns=self.NUM_BRUTE_SAMPLES, full_output=True)
         return minimizer, minimum
 
@@ -185,17 +183,24 @@ class Player:
         return self._get_cut_default(pizzas, remaining_pizza_ids, customer_amounts)
 
     def _get_cut_4(self, pizzas, remaining_pizza_ids, customer_amounts):
-        pizza_id = remaining_pizza_ids[0]
-        pizza = pizzas[pizza_id]
-        angle, _ = self._minimize_error(pizza, (pi, 2 * pi), 5, [0, 1], customer_amounts)
-        angle_flipped, _ = self._minimize_error(pizza, (pi, 2 * pi), 5, [0, 1], customer_amounts, True)
-        radius_range = (sqrt(2) * (1.22 + 0.375), 6 - self.MAX_RADIUS_PAD)
-        radius, error = self._minimize_error(pizza, radius_range, angle, [2, 3], customer_amounts)
-        radius_flipped, error_flipped = self._minimize_error(pizza, radius_range, angle, [2, 3], customer_amounts, True)
-        if error_flipped < error:
-            angle = angle_flipped
-            radius = radius_flipped
-        return pizza_id, self._get_interpoint(angle, radius), angle + (pi/4 if error_flipped < error else 0)
+        error_minimum = 999
+        for pizza_id in remaining_pizza_ids:
+            pizza = pizzas[pizza_id]
+            inside_topping_ids = [pizza[0][2] - 1, pizza[2][2] - 1]
+            outside_topping_ids = [pizza[12][2] - 1, pizza[18][2] - 1]
+            angle, _ = self._minimize_error(pizza, (pi, 2 * pi), 5, inside_topping_ids, customer_amounts)
+            angle_flipped = 3 * pi - angle
+            radius_range = (sqrt(2) * (1.22 + 0.375), 6 - self.MAX_RADIUS_PAD)
+            radius, error = self._minimize_error(pizza, angle, radius_range, outside_topping_ids, customer_amounts)
+            radius_flipped, error_flipped = self._minimize_error(pizza, angle_flipped, radius_range, outside_topping_ids, customer_amounts, True)
+            if min(error, error_flipped) < error_minimum:
+                error_minimum = min(error, error_flipped)
+                if error < error_flipped:
+                    error_minimizer = [pizza_id, angle, radius, False]
+                else:
+                    error_minimizer = [pizza_id, angle_flipped, radius_flipped, True]
+        pizza_id, angle, radius, flipped = error_minimizer
+        return pizza_id, self._get_interpoint(angle, radius), angle + (pi/4 if flipped else 0)
 
     def choose_and_cut(self, pizzas, remaining_pizza_ids, customer_amounts):
         """Function which based n current game state returns the distance and angle, the shot must be played
