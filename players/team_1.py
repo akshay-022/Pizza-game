@@ -206,6 +206,8 @@ class Player:
 
 
     def lines_topping_3(self, preferences):
+        numbers = [1, 2, 3]
+        random.shuffle(numbers)
         pizzas = []
         pizza = np.zeros((24, 3))
         x_margin = 1.5
@@ -213,30 +215,33 @@ class Player:
         new_y_start_change = .75 * 4
         center_size = .375
         # now lets find the starting point
-        x_pos_left = -x_margin - center_size
-        x_pos_middle = center_size
-        x_pos_right = x_margin + center_size
+        x_pos_left = -x_margin #- center_size
+        x_pos_middle = 0#center_size
+        x_pos_right = x_margin #+ center_size
 
         y_start = new_y_start_change
         y = y_start
         # for i in range(24):
+        id = numbers.pop()
         for i in range(8):
             pizza[i][0] = x_pos_left
             pizza[i][1] = y
-            pizza[i][2] = 1
+            pizza[i][2] = id
             y -= .76  # to move down
             # print("x_pos left: " + str(x_pos_left) + "and y " + str(y))
         y = y_start
+        id = numbers.pop()
         for j in range(8, 16):
             pizza[j][0] = x_pos_middle
             pizza[j][1] = y
-            pizza[j][2] = 2
+            pizza[j][2] = id
             y -= .76  # to move down
         y = y_start
+        id = numbers.pop()
         for k in range(16, 24):
             pizza[k][0] = x_pos_right
             pizza[k][1] = y
-            pizza[k][2] = 3
+            pizza[k][2] = id
             y -= .76  # to move down
             # print("x_pos right: " + str(x_pos_right) + "and y " + str(y))
         return pizza
@@ -244,9 +249,11 @@ class Player:
     def lines_topping_4(self, preferences):
         pizzas = []
         pizza = np.zeros((24, 3))
+        numbers = [1, 2, 3, 4]
+        random.shuffle(numbers)
         x_margin = 1.5
         # new_y_start_change = (6-math.sqrt(35))/2
-        new_y_start_change = .75 * 4
+        new_y_start_change = .75 * 3
         center_size = .375
         # now lets find the starting point
         x_pos_left1 = -2.25 - center_size
@@ -257,29 +264,33 @@ class Player:
         y_start = new_y_start_change
         y = y_start
         # for i in range(24):
+        id = numbers.pop()
         for i in range(6):
             pizza[i][0] = x_pos_left1
             pizza[i][1] = y
-            pizza[i][2] = 1
+            pizza[i][2] = id 
             y -= .76  # to move down
             # print("x_pos left: " + str(x_pos_left) + "and y " + str(y))
         y = y_start
+        id = numbers.pop()
         for j in range(6, 12):
             pizza[j][0] = x_pos_left2
             pizza[j][1] = y
-            pizza[j][2] = 2
+            pizza[j][2] = id
             y -= .76  # to move down
         y = y_start
+        id = numbers.pop()
         for k in range(12, 18):
             pizza[k][0] = x_pos_right1
             pizza[k][1] = y
-            pizza[k][2] = 3
+            pizza[k][2] = id
             y -= .76  # to move down
         y = y_start
+        id = numbers.pop()
         for l in range(18, 24):
             pizza[l][0] = x_pos_right2
             pizza[l][1] = y
-            pizza[l][2] = 4
+            pizza[l][2] = id
             y -= .76  # to move down
             # print("x_pos right: " + str(x_pos_right) + "and y " + str(y))
         return pizza
@@ -335,28 +346,20 @@ class Player:
 
         # DEFAULT FOR 3 TOPPINGS
         elif self.num_toppings == 3:
-            print("using this function oop")
-            x_coords = [np.sin(np.pi/2)]
-            pizzas = np.zeros((10, 24, 3))
-            for j in range(constants.number_of_initial_pizzas):
-                pizza_indiv = np.zeros((24,3))
-                i = 0
-                while i<24:
-                    angle = self.rng.random()*2*np.pi
-                    dist = self.rng.random()*6
-                    x = dist*np.cos(angle)
-                    y = dist*np.sin(angle)
-                    clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
-                    if not clash_exists:
-                        pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
-                        i = i+1
-                pizza_indiv = np.array(pizza_indiv)
-                pizzas[j] = pizza_indiv
-            for pizza in pizzas:
-                for topping in pizza:
-                    print("x postion is " + str(topping[0]))
-                    print("y postion is " + str(topping[1]))
-            return list(pizzas)
+         
+            '''num_runs_per_approach = self.list_sum_to_total(10, 4)
+            print(f'num_runs_per_approach: {num_runs_per_approach}')'''
+
+            pizzas = []
+            '''for i in range(num_runs_per_approach[0]):
+                pizzas.append(self.circle_topping_3_v1(preferences))
+            for i in range(num_runs_per_approach[1]):
+                pizzas.append(self.circle_topping_3_v2(preferences))
+            for i in range(num_runs_per_approach[2]):
+                pizzas.append(self.lines_topping_3(preferences))'''
+            for i in range(10):
+                pizzas.append(self.lines_topping_3(preferences))
+            return pizzas
 
         elif self.num_toppings == 4:
 
@@ -364,7 +367,7 @@ class Player:
             THEN, we can loop through them for each value in the distribution to generate 10 pizzas"""
 
             # For now, we have 2 approaches for 4 toppings. need to manually code for however many approaches we have
-            num_runs_per_approach = self.list_sum_to_total(10, 3)
+            num_runs_per_approach = self.list_sum_to_total(10, 4)
             print(f'num_runs_per_approach: {num_runs_per_approach}')
 
             pizzas = []
@@ -373,6 +376,8 @@ class Player:
             for i in range(num_runs_per_approach[1]):
                 pizzas.append(self.circle_topping_4_v2(preferences))
             for i in range(num_runs_per_approach[2]):
+                pizzas.append(self.lines_topping_4(preferences))
+            for i in range(num_runs_per_approach[3]):
                 pizzas.append(self.lines_topping_4(preferences))
             return pizzas
 
