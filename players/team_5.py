@@ -4,9 +4,10 @@ from typing import Tuple, List
 from utils import pizza_calculations
 
 import numpy as np
-from itertools import permutations
+from itertools import permutations, combinations
 from math import pi, sin, cos, sqrt
 from scipy.optimize import brute
+import statistics
 
 
 class Player:
@@ -71,6 +72,52 @@ class Player:
         print(pizzas)
         return list(pizzas)
 
+    def _analyze_distribution(self, preferences):
+        """
+            Analyze the distribution of preferences and return topping rankings.
+            Returns list of top 2 rankings and the mean they occur with
+        """
+        # comb to counter map -> if top two for a given ranking
+        ranking_map = {}
+        for comb in combinations(range(1, self.num_toppings+1), 2):
+            ranking_map[comb] = 0
+
+        for preference in preferences:
+            ranking_1 = self._get_top2_ingredients(preference[0])
+            ranking_2 = self._get_top2_ingredients(preference[1])
+            self._update_ranking_map(ranking_map, ranking_1)
+            self._update_ranking_map(ranking_map, ranking_2)
+        num_rankings = len(preferences)*2
+        for key in ranking_map:
+            ranking_map[key] = ranking_map[key]*10/num_rankings
+
+        self._round_map_avgs(ranking_map)
+        return ranking_map
+
+    # Round the averages so number of pizzas to make are whole numbers summing to 10
+    def _round_map_avgs(self, ranking_map):
+        num_pizzas = 0
+        total = 0
+        for key in ranking_map.keys():
+            total += ranking_map[key]
+            rounded = round(ranking_map[key])
+            num_pizzas += rounded
+            if num_pizzas < round(total):
+                rounded += 1
+                num_pizzas += 1
+            ranking_map[key] = rounded
+            # TODO: Clean this up to make sure it adds to 10
+
+    def _update_ranking_map(self, ranking_map, ranking):
+        if ranking in ranking_map.keys():
+            ranking_map[ranking] += 1
+        else:
+            ranking_map[ranking[1], ranking[0]] += 1
+
+    def _get_top2_ingredients(self, preference):
+        ranked_list = sorted(range(len(preference)), key=lambda i: preference[i])[-2:]
+        return ranked_list[0]+1, ranked_list[1]+1
+
     def _draw_topping(self, angle_start, angle_end, amount, category, r = None):
         theta = (angle_end-angle_start)/(2*amount)
         radius = self.BUFFER + 0.375/sin(theta)
@@ -122,6 +169,8 @@ class Player:
         Returns:
             pizzas(list) : List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping center, y coordinate of topping center, topping number of topping(1/2/3/4) (Note that it starts from 1, not 0)]
         """
+        # TODO: finalize this into 10 pizzas with top 2 rankings
+        ranking_map = self._analyze_distribution(preferences)
         if self.num_toppings == 2:
             return self._get_topping_2(preferences)
         elif self.num_toppings == 3:
@@ -180,7 +229,24 @@ class Player:
         return remaining_pizza_ids[0], self._get_interpoint(angle, radius), angle
 
     def _get_cut_3(self, pizzas, remaining_pizza_ids, customer_amounts):
-        return self._get_cut_default(pizzas, remaining_pizza_ids, customer_amounts)
+        error_minimum = 999
+        for pizza_id in remaining_pizza_ids:
+            pizza = pizzas[pizza_id]
+            inside_topping_ids = [pizza[0][2] - 1, pizza[2][2] - 1]
+            outside_topping_id = [pizza[15][2] - 1]
+            angle, _ = self._minimize_error(pizza, (pi, 2 * pi), 5, inside_topping_ids, customer_amounts)
+            angle_flipped = 3 * pi - angle
+            radius_range = (sqrt(2) * (1.45 + 0.375), 6 - self.MAX_RADIUS_PAD) # 1.45 is radius from center of pizza to center of topping in outer ring
+            radius, error = self._minimize_error(pizza, angle, radius_range, outside_topping_id, customer_amounts)
+            radius_flipped, error_flipped = self._minimize_error(pizza, angle_flipped, radius_range, outside_topping_id, customer_amounts, True)
+            if min(error, error_flipped) < error_minimum:
+                error_minimum = min(error, error_flipped)
+                if error < error_flipped:
+                    error_minimizer = [pizza_id, angle, radius, False]
+                else:
+                    error_minimizer = [pizza_id, angle_flipped, radius_flipped, True]
+        pizza_id, angle, radius, flipped = error_minimizer
+        return pizza_id, self._get_interpoint(angle, radius), angle + (pi/4 if flipped else 0)
 
     def _get_cut_4(self, pizzas, remaining_pizza_ids, customer_amounts):
         error_minimum = 999
