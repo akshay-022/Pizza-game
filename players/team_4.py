@@ -10,6 +10,9 @@ class Player:
         """Initialise the player"""
         self.rng = rng
         self.num_toppings = num_toppings
+        self.multiplier = 40
+        self.x_center = 12*self.multiplier	# Center Point x of pizza
+        self.y_center = 10*self.multiplier	# Center Point y of pizza
 
     # def customer_gen(self, num_cust, rng = None):
         
@@ -183,14 +186,64 @@ class Player:
         Returns:
             Tuple[int, center, first cut angle]: Return the pizza id you choose, the center of the cut in format [x_coord, y_coord] where both are in inches relative of pizza center of radius 6, the angle of the first cut in radians. 
         """
-        pizza_id = remaining_pizza_ids[0]
-        pref = self.opt_ratio(customer_amounts)
-        if len(pref) == 3:
-            return  remaining_pizza_ids[0], [0,0], np.pi/8
+        # pizza_id = remaining_pizza_ids[0]
+        # pref = self.opt_ratio(customer_amounts)
+        # if len(pref) == 3:
+        #     return  remaining_pizza_ids[0], [0,0], np.pi/8
         
-        angle = (pref[0] / (24 / self.num_toppings)) * np.pi
-        dist = 5.999
-        x = dist*np.cos(angle)
-        y = dist*np.sin(angle)
+        # angle = (pref[0] / (24 / self.num_toppings)) * np.pi
+        # dist = 5.999
+        # x = dist*np.cos(angle)
+        # y = dist*np.sin(angle)
 
-        return remaining_pizza_ids[0], [x,y], angle
+        # return remaining_pizza_ids[0], [x,y], angle
+
+        # Calculate the optimal cut
+
+        best_S = -np.inf
+        best_cut = None
+        n = 100
+        cut_d = 6/n
+        cut_angle = (np.pi) / n
+        pizza_id = remaining_pizza_ids[0]
+
+        for i in range(n):
+            d = cut_d * i
+            for j in range(n):
+                angle = cut_angle * j
+                x = d * np.cos(angle)
+                y = d * np.sin(angle)
+
+                cut = [x, y, angle]
+                print(cut)
+
+                obtained_pref, slice_areas_toppings = pizza_calculations().ratio_calculator(pizzas[pizza_id], cut, self.num_toppings, self.multiplier, self.x_center, self.y_center)
+                obtained_pref = np.array(obtained_pref)
+
+                # random_pref, temp = pizza_calculations().ratio_calculator(pizzas[pizza_id], [self.x_center, self.y_center, self.rng.random()*2*np.pi], self.num_toppings, self.multiplier, self.x_center, self.y_center)
+                # random_pref = np.array(random_pref)
+
+                required_pref = np.array(customer_amounts)
+                uniform_pref = np.ones((2, self.num_toppings))*(12/self.num_toppings)
+                B = np.round(np.absolute(required_pref - uniform_pref), 3)
+                C = np.round(np.absolute(obtained_pref - required_pref), 3)
+                # U = np.round(np.absolute(random_pref - uniform_pref), 3)
+                
+                S = (B - C).sum()
+
+                print(S)
+                if S > best_S:
+                    best_S = S
+                    best_cut = cut
+                    # print(best_cut)
+
+        print("Final S: ", best_S)
+        print("Final cut: ", best_cut)
+        print("Customer amounts: ", customer_amounts)
+        best_x, best_y, best_angle = best_cut
+        return remaining_pizza_ids[0], [best_x, best_y], best_angle
+
+
+
+
+
