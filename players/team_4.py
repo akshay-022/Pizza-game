@@ -202,9 +202,9 @@ class Player:
 
         best_S = -np.inf
         best_cut = None
-        n = 100
+        n = 50
         cut_d = 6/n
-        cut_angle = (np.pi) / n
+        cut_angle = (2*np.pi) / n
         pizza_id = remaining_pizza_ids[0]
 
         for i in range(n):
@@ -215,9 +215,12 @@ class Player:
                 y = d * np.sin(angle)
 
                 cut = [x, y, angle]
-                print(cut)
+                
+                x_mod = (self.x_center + x * self.multiplier)
+                y_mod = (self.y_center + y * self.multiplier)
+                cut_mod = [x_mod, y_mod, angle]
 
-                obtained_pref, slice_areas_toppings = pizza_calculations().ratio_calculator(pizzas[pizza_id], cut, self.num_toppings, self.multiplier, self.x_center, self.y_center)
+                obtained_pref, slice_areas_toppings = pizza_calculations().ratio_calculator(pizzas[pizza_id], cut_mod, self.num_toppings, self.multiplier, self.x_center, self.y_center)
                 obtained_pref = np.array(obtained_pref)
 
                 # random_pref, temp = pizza_calculations().ratio_calculator(pizzas[pizza_id], [self.x_center, self.y_center, self.rng.random()*2*np.pi], self.num_toppings, self.multiplier, self.x_center, self.y_center)
@@ -228,18 +231,15 @@ class Player:
                 B = np.round(np.absolute(required_pref - uniform_pref), 3)
                 C = np.round(np.absolute(obtained_pref - required_pref), 3)
                 # U = np.round(np.absolute(random_pref - uniform_pref), 3)
-                
-                S = (B - C).sum()
 
-                print(S)
+                S = (B - C).sum()
+                # print("S: ", S)
                 if S > best_S:
                     best_S = S
                     best_cut = cut
-                    # print(best_cut)
+                    # print("Best S: ", best_S)
 
-        print("Final S: ", best_S)
-        print("Final cut: ", best_cut)
-        print("Customer amounts: ", customer_amounts)
+        print("Final S: ", np.round(best_S, 2))
         best_x, best_y, best_angle = best_cut
         return remaining_pizza_ids[0], [best_x, best_y], best_angle
 
