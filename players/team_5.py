@@ -83,18 +83,15 @@ class Player:
             ranking_map[comb] = 0
 
         for preference in preferences:
-            ranking_1 = self._get_top2_ingredients(preference[0])
-            ranking_2 = self._get_top2_ingredients(preference[1])
-            self._update_ranking_map(ranking_map, ranking_1)
-            self._update_ranking_map(ranking_map, ranking_2)
-        num_rankings = len(preferences)*2
+            self._get_center_ingredients(preference, ranking_map)
+        num_rankings = len(preferences)
         for key in ranking_map:
             ranking_map[key] = ranking_map[key]*10/num_rankings
 
         self._round_map_avgs(ranking_map)
         return ranking_map
 
-    # Round the averages so number of pizzas to make are whole numbers summing to 10
+    # Round the averages so number of pizzas to make are whole numbers...
     def _round_map_avgs(self, ranking_map):
         num_pizzas = 0
         total = 0
@@ -105,18 +102,29 @@ class Player:
             if num_pizzas < round(total):
                 rounded += 1
                 num_pizzas += 1
+            elif num_pizzas > round(total):
+                rounded -= 1
+                num_pizzas -= 1
             ranking_map[key] = rounded
-            # TODO: Clean this up to make sure it adds to 10
 
-    def _update_ranking_map(self, ranking_map, ranking):
-        if ranking in ranking_map.keys():
-            ranking_map[ranking] += 1
-        else:
-            ranking_map[ranking[1], ranking[0]] += 1
-
-    def _get_top2_ingredients(self, preference):
-        ranked_list = sorted(range(len(preference)), key=lambda i: preference[i])[-2:]
-        return ranked_list[0]+1, ranked_list[1]+1
+    # TODO: Verify that we are using the right metric to pick the middle two ingredients- line 122
+    def _get_center_ingredients(self, preference, ranking_map):
+        """
+        :param preference:
+        :param ranking_map:
+        :return: Returns ranking map of center two ingredients.
+            Two ingredients should be in the center when for ingredient x,y
+            (x_a - y_a) + (y_b - x_b) is maxed for all combinations of ingredients.
+        """
+        max_satisfaction_diff = 0
+        best_pairing = (0, 0)
+        for ranking in ranking_map.keys():
+            satisfaction_diff = (abs(preference[0][ranking[0]-1] - preference[0][ranking[1]-1]) +
+                                 abs(preference[1][ranking[1]-1] - preference[1][ranking[0]-1]))
+            if satisfaction_diff > max_satisfaction_diff:
+                max_satisfaction_diff = satisfaction_diff
+                best_pairing = ranking
+        ranking_map[best_pairing] += 1
 
     def _draw_topping(self, angle_start, angle_end, amount, category, r = None):
         theta = (angle_end-angle_start)/(2*amount)
@@ -133,7 +141,7 @@ class Player:
         pizza = inner + outer
         return [pizza] * 10
 
-    def _get_topping_3(self, preferences):
+    def _get_topping_3(self, ranking_map):
         def helper(categories):
             inner = self._draw_topping(0, pi, 2, categories[0]) +\
                     self._draw_topping(pi, 2*pi, 2, categories[1])
@@ -141,10 +149,18 @@ class Player:
                     self._draw_topping(pi, 2*pi, 6, categories[1])
             arc = self._draw_topping(0.25*pi, 0.75*pi, 8, categories[2])
             return inner + outer + arc
-        perms = list(permutations([1,2,3]))*2
-        return [helper(perm) for perm in perms[0:10]]
+        final_toppings = []
+        for key in ranking_map.keys():
+            remaining_toppings = [num+1 for num in range(self.num_toppings) if num+1 not in key]
+            all_toppings = list(key) + remaining_toppings
+            for i in range(ranking_map[key]):
+                final_toppings.append(helper(all_toppings))
+        # doubling/capping in case rounding causes sum to be over/under 10
+        return (final_toppings*2)[0:10]
+        # perms = list(permutations([1,2,3]))*2
+        # return [helper(perm) for perm in perms[0:10]]
 
-    def _get_topping_4(self, preferences):
+    def _get_topping_4(self, ranking_map):
         def helper(categories):
             inner = self._draw_topping(0, pi, 2, categories[0]) +\
                     self._draw_topping(pi, 2*pi, 2, categories[1])
@@ -156,6 +172,16 @@ class Player:
                 self._draw_topping(0.5*pi, pi, 6, categories[3], 4)
             # used 4 to move the arc outer. may wanna change this.
             return inner + outer + arc
+
+        final_toppings = []
+        for key in ranking_map.keys():
+            remaining_toppings = [num+1 for num in range(self.num_toppings) if num+1 not in key]
+            all_toppings = list(key) + remaining_toppings
+            for i in range(ranking_map[key]):
+                final_toppings.append(helper(all_toppings))
+        # doubling/capping in case rounding causes sum to be over/under 10
+        # Uncomment this line and comment out bottom two to choose pizzas based on dist
+        #return (final_toppings*2)[0:10]
         perms = list(permutations([1,2,3,4]))
         return [helper(perm) for perm in perms[0:10]]
 
@@ -169,14 +195,13 @@ class Player:
         Returns:
             pizzas(list) : List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping center, y coordinate of topping center, topping number of topping(1/2/3/4) (Note that it starts from 1, not 0)]
         """
-        # TODO: finalize this into 10 pizzas with top 2 rankings
         ranking_map = self._analyze_distribution(preferences)
         if self.num_toppings == 2:
             return self._get_topping_2(preferences)
         elif self.num_toppings == 3:
-            return self._get_topping_3(preferences)
+            return self._get_topping_3(ranking_map)
         elif self.num_toppings == 4:
-            return self._get_topping_4(preferences)
+            return self._get_topping_4(ranking_map)
         else:
             return self._get_topping_default(preferences)
 
