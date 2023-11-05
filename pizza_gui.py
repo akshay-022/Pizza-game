@@ -393,6 +393,10 @@ class gui():
             if list(self.cuts[i]) == [0,0,0]:
                 options_pizza.append(i)
         pizza_id, center, theta = self.player_instance.choose_and_cut(self.pizzas, options_pizza, self.preferences[self.customer_id])
+        center_x_temp = center[0]
+        center_y_temp = center[1]
+        if center_x_temp**2 + center_y_temp**2 > 36:
+            print("You are trying to choose a center outside the pizza!")
         self.pizza_id = pizza_id
         self.cuts[pizza_id][0] = (self.x + center[0]*self.multiplier)
         self.cuts[pizza_id][1] = (self.y - center[1]*self.multiplier)
