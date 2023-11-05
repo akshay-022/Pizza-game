@@ -86,6 +86,36 @@ class Player:
 
         return self.circle_topping_3(preferences, inner_indices, outer_indices)
 
+    def circle_topping_3_v2(self, preferences):
+        """
+        Return 1 pizza of 12 toppings in an inner circle, split horizontally,
+        and 12 in an outer circle, split vertically.
+
+        Inner circle: 1
+        Outer circle: 2, 3
+        """
+        # toppings 1 (num toppings/n = 24/4 = 6 per topping)
+        inner_indices = [1] * 8 + [3] * 8
+        # toppings 2 and 3
+        outer_indices = [2] * 8
+
+        return self.circle_topping_3(preferences, inner_indices, outer_indices)
+
+    def circle_topping_3_v3(self, preferences):
+        """
+        Return 1 pizza of 12 toppings in an inner circle, split horizontally,
+        and 12 in an outer circle, split vertically.
+
+        Inner circle: 1
+        Outer circle: 2, 3
+        """
+        # toppings 1 (num toppings/n = 24/4 = 6 per topping)
+        inner_indices = [2] * 8 + [3] * 8
+        # toppings 2 and 3
+        outer_indices = [1] * 8
+
+        return self.circle_topping_3(preferences, inner_indices, outer_indices)
+
     def circle_topping_3(self, preferences, inner_indices, outer_indices):
         """
         Return 1 pizza of 12 toppings in an inner circle, split horizontally,
@@ -425,24 +455,24 @@ class Player:
             return pizzas
 
 
-
-        # DEFAULT FOR 3 TOPPINGS
         elif self.num_toppings == 3:
          
-            '''num_runs_per_approach = self.list_sum_to_total(10, 4)
-            print(f'num_runs_per_approach: {num_runs_per_approach}')'''
+            num_runs_per_approach = self.list_sum_to_total(10, 4)
+            print(f'num_runs_per_approach: {num_runs_per_approach}')
 
             pizzas = []
-            '''for i in range(num_runs_per_approach[0]):
+            for i in range(num_runs_per_approach[0]):
                 pizzas.append(self.circle_topping_3_v1(preferences))
             for i in range(num_runs_per_approach[1]):
                 pizzas.append(self.circle_topping_3_v2(preferences))
             for i in range(num_runs_per_approach[2]):
-                pizzas.append(self.lines_topping_3(preferences))'''
+                pizzas.append(self.circle_topping_3_v3(preferences))
+            for i in range(num_runs_per_approach[3]):
+                pizzas.append(self.lines_topping_3(preferences))
             # for i in range(10):
             #     pizzas.append(self.lines_topping_3(preferences))
-            # return pizzas
-            return [self.circle_topping_3_v1(preferences)] * 10
+            return pizzas
+            # return [self.circle_topping_3_v1(preferences)] * 2 + [self.circle_topping_3_v2(preferences)] * 2 + [self.circle_topping_3_v3(preferences)] * 2 + [self.lines_topping_3(preferences)] * 4
 
         elif self.num_toppings == 4:
 
@@ -450,21 +480,29 @@ class Player:
             THEN, we can loop through them for each value in the distribution to generate 10 pizzas"""
 
             # For now, we have 2 approaches for 4 toppings. need to manually code for however many approaches we have
-            num_runs_per_approach = self.list_sum_to_total(10, 4)
+            num_runs_per_approach = self.list_sum_to_total(10, 8)
             print(f'num_runs_per_approach: {num_runs_per_approach}')
-            #
-            # pizzas = []
-            # for i in range(num_runs_per_approach[0]):
-            #     pizzas.append(self.circle_topping_4_v1(preferences))
-            # for i in range(num_runs_per_approach[1]):
-            #     pizzas.append(self.circle_topping_4_v2(preferences))
-            # for i in range(num_runs_per_approach[2]):
-            #     pizzas.append(self.lines_topping_4(preferences))
-            # for i in range(num_runs_per_approach[3]):
-            #     pizzas.append(self.lines_topping_4(preferences))
-            # return pizzas
 
-            return [self.circle_topping_4_v1(preferences)] * 1 + [self.circle_topping_4_v2(preferences)] * 1 + [self.circle_topping_4_v3(preferences)] * 1 + [self.circle_topping_4_v4(preferences)] * 1 + [self.circle_topping_4_v5(preferences)] * 1 + [self.circle_topping_4_v6(preferences)] * 5
+            pizzas = []
+            for i in range(num_runs_per_approach[0]):
+                pizzas.append(self.circle_topping_4_v1(preferences))
+            for i in range(num_runs_per_approach[1]):
+                pizzas.append(self.circle_topping_4_v2(preferences))
+            for i in range(num_runs_per_approach[2]):
+                pizzas.append(self.lines_topping_4(preferences))
+            for i in range(num_runs_per_approach[3]):
+                pizzas.append(self.lines_topping_4(preferences))
+            for i in range(num_runs_per_approach[4]):
+                pizzas.append(self.circle_topping_4_v3(preferences))
+            for i in range(num_runs_per_approach[5]):
+                pizzas.append(self.circle_topping_4_v4(preferences))
+            for i in range(num_runs_per_approach[6]):
+                pizzas.append(self.circle_topping_4_v5(preferences))
+            for i in range(num_runs_per_approach[7]):
+                pizzas.append(self.circle_topping_4_v6(preferences))
+            return pizzas
+
+            # return [self.circle_topping_4_v1(preferences)] * 1 + [self.circle_topping_4_v2(preferences)] * 1 + [self.circle_topping_4_v3(preferences)] * 1 + [self.circle_topping_4_v4(preferences)] * 1 + [self.circle_topping_4_v5(preferences)] * 1 + [self.circle_topping_4_v6(preferences)] * 5
 
 
     #def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
