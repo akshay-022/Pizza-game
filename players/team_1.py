@@ -71,6 +71,52 @@ class Player:
         ]
         return pizza
 
+    def circle_topping_3_v1(self, preferences):
+        """
+        Return 1 pizza of 12 toppings in an inner circle, split horizontally,
+        and 12 in an outer circle, split vertically.
+
+        Inner circle: 1
+        Outer circle: 2, 3
+        """
+        # toppings 1 (num toppings/n = 24/4 = 6 per topping)
+        inner_indices = [1] * 8 + [2] * 8
+        # toppings 2 and 3
+        outer_indices = [3] * 8
+
+        return self.circle_topping_3(preferences, inner_indices, outer_indices)
+
+    def circle_topping_3(self, preferences, inner_indices, outer_indices):
+        """
+        Return 1 pizza of 12 toppings in an inner circle, split horizontally,
+        and 6 in an outer arc
+        """
+
+        theta = np.pi / 16
+        inner_radius = BUFFER + 0.375 / np.sin(theta)
+        outer_radius = BUFFER + 0.375 / np.sin(theta / 2)
+
+        outer_angle = np.pi / 2
+
+        inner = [
+            [
+                inner_radius * np.cos((2 * i + 1) * theta),
+                inner_radius * np.sin((2 * i + 1) * theta),
+                inner_indices[i]
+            ]
+            for i in range(16)
+        ]
+        outer = [
+            [
+                outer_radius * np.cos(outer_angle + (2 * i + 1) * theta),
+                outer_radius * np.sin(outer_angle + (2 * i + 1) * theta),
+                outer_indices[i]
+            ]
+            for i in range(8)
+        ]
+        pizza = inner + outer
+        return pizza
+
     def circle_topping_4_v1(self, preferences):
         """
         Return 1 pizza of 12 toppings in an inner circle, split horizontally,
@@ -157,11 +203,11 @@ class Player:
         and 12 in an outer circle, split vertically
         """
 
-        inner_radius = BUFFER + 0.189 / np.sin(np.pi / 24)
-        outer_radius = BUFFER + 0.375 / np.sin(np.pi / 24)
-
         theta = np.pi / 12
-        outer_angle = 11 * np.pi / 6
+        inner_radius = BUFFER + 0.375 / np.sin(theta)
+        outer_radius = BUFFER + 0.375 / np.sin(theta / 2)
+
+        outer_angle = np.pi / 2
 
         inner = [
             [
@@ -173,8 +219,8 @@ class Player:
         ]
         outer = [
             [
-                outer_radius * np.cos((outer_angle + (2 * i + 1)) * theta),
-                outer_radius * np.sin((outer_angle + (2 * i + 1)) * theta),
+                outer_radius * np.cos(outer_angle + (2 * i + 1) * theta),
+                outer_radius * np.sin(outer_angle + (2 * i + 1) * theta),
                 outer_indices[i]
             ]
             for i in range(12)
@@ -393,9 +439,10 @@ class Player:
                 pizzas.append(self.circle_topping_3_v2(preferences))
             for i in range(num_runs_per_approach[2]):
                 pizzas.append(self.lines_topping_3(preferences))'''
-            for i in range(10):
-                pizzas.append(self.lines_topping_3(preferences))
-            return pizzas
+            # for i in range(10):
+            #     pizzas.append(self.lines_topping_3(preferences))
+            # return pizzas
+            return [self.circle_topping_3_v1(preferences)] * 10
 
         elif self.num_toppings == 4:
 
@@ -405,19 +452,19 @@ class Player:
             # For now, we have 2 approaches for 4 toppings. need to manually code for however many approaches we have
             num_runs_per_approach = self.list_sum_to_total(10, 4)
             print(f'num_runs_per_approach: {num_runs_per_approach}')
+            #
+            # pizzas = []
+            # for i in range(num_runs_per_approach[0]):
+            #     pizzas.append(self.circle_topping_4_v1(preferences))
+            # for i in range(num_runs_per_approach[1]):
+            #     pizzas.append(self.circle_topping_4_v2(preferences))
+            # for i in range(num_runs_per_approach[2]):
+            #     pizzas.append(self.lines_topping_4(preferences))
+            # for i in range(num_runs_per_approach[3]):
+            #     pizzas.append(self.lines_topping_4(preferences))
+            # return pizzas
 
-            pizzas = []
-            for i in range(num_runs_per_approach[0]):
-                pizzas.append(self.circle_topping_4_v1(preferences))
-            for i in range(num_runs_per_approach[1]):
-                pizzas.append(self.circle_topping_4_v2(preferences))
-            for i in range(num_runs_per_approach[2]):
-                pizzas.append(self.lines_topping_4(preferences))
-            for i in range(num_runs_per_approach[3]):
-                pizzas.append(self.lines_topping_4(preferences))
-            return pizzas
-
-            # return [self.circle_topping_4_v1(preferences)] * 1 + [self.circle_topping_4_v2(preferences)] * 1 + [self.circle_topping_4_v3(preferences)] * 1 + [self.circle_topping_4_v4(preferences)] * 1 + [self.circle_topping_4_v5(preferences)] * 1 + [self.circle_topping_4_v6(preferences)] * 5
+            return [self.circle_topping_4_v1(preferences)] * 1 + [self.circle_topping_4_v2(preferences)] * 1 + [self.circle_topping_4_v3(preferences)] * 1 + [self.circle_topping_4_v4(preferences)] * 1 + [self.circle_topping_4_v5(preferences)] * 1 + [self.circle_topping_4_v6(preferences)] * 5
 
 
     #def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
