@@ -74,69 +74,108 @@ class Player:
     def circle_topping_4_v1(self, preferences):
         """
         Return 1 pizza of 12 toppings in an inner circle, split horizontally,
-        and 12 in an outer circle, split vertically
+        and 12 in an outer circle, split vertically.
+
+        Inner circle: 1, 2
+        Outer circle: 3, 4
         """
+        # toppings 1 and 2 (num toppings/n = 24/4 = 6 per topping)
+        inner_indices = [1] * 6 + [2] * 6
+        # toppings 3 and 4
+        outer_indices = [3] * 6 + [4] * 6
 
-        #0.189 (+ buffer) was minimum i could find for the inner circle to NOT overlap for now
-        inner_radius = BUFFER + 0.189 / np.sin(np.pi / 24)
-        outer_radius = BUFFER + 0.375 / np.sin(np.pi / 24)
-
-        theta = np.pi / 12
-
-        # found angle thru testing around unit circle until appeared ~ vertically split
-        outer_angle = 11 * np.pi / 6
-
-        # make a small inner circle, split horizontally
-        inner = [
-            [
-                inner_radius*np.cos((2*i+1)*theta),
-                inner_radius*np.sin((2*i+1)*theta),
-                1+i//6
-            ]
-            for i in range(12)
-        ]
-        # make a larger outer circle, split vertically
-        outer = [
-            [
-                outer_radius*np.cos((outer_angle + (2*i+1))*theta),
-                outer_radius*np.sin((outer_angle + (2*i+1))*theta),
-                1+i//6
-            ]
-            for i in range(12, 24)
-        ]
-        pizza = inner + outer
-        return pizza
+        return self.circle_topping_4(preferences, inner_indices, outer_indices)
 
     def circle_topping_4_v2(self, preferences):
         """
         Return 1 pizza of 12 toppings in an inner circle, split horizontally,
         and 12 in an outer circle, split vertically
+
+        Inner circle: 3, 4
+        Outer circle: 1, 2
+        """
+        inner_indices = [3] * 6 + [4] * 6
+        outer_indices = [1] * 6 + [2] * 6
+
+        return self.circle_topping_4(preferences, inner_indices, outer_indices)
+
+    def circle_topping_4_v3(self, preferences):
+        """
+        Return 1 pizza of 12 toppings in an inner circle, split horizontally,
+        and 12 in an outer circle, split vertically
+
+        Inner circle: 1, 3
+        Outer circle: 2, 4
+        """
+        inner_indices = [1] * 6 + [3] * 6
+        outer_indices = [2] * 6 + [4] * 6
+
+        return self.circle_topping_4(preferences, inner_indices, outer_indices)
+
+    def circle_topping_4_v4(self, preferences):
+        """
+        Return 1 pizza of 12 toppings in an inner circle, split horizontally,
+        and 12 in an outer circle, split vertically
+
+        Inner circle: 2, 4
+        Outer circle: 1, 3
+        """
+        inner_indices = [2] * 6 + [4] * 6
+        outer_indices = [1] * 6 + [3] * 6
+
+        return self.circle_topping_4(preferences, inner_indices, outer_indices)
+
+    def circle_topping_4_v5(self, preferences):
+        """
+        Return 1 pizza of 12 toppings in an inner circle, split horizontally,
+        and 12 in an outer circle, split vertically
+
+        Inner circle: 3, 2
+        Outer circle: 4, 1
+        """
+        inner_indices = [3] * 6 + [2] * 6
+        outer_indices = [4] * 6 + [1] * 6
+
+        return self.circle_topping_4(preferences, inner_indices, outer_indices)
+
+    def circle_topping_4_v6(self, preferences):
+        """
+        Return 1 pizza of 12 toppings in an inner circle, split horizontally,
+        and 12 in an outer circle, split vertically
+
+        Inner circle: 4, 1
+        Outer circle: 3, 2
+        """
+        inner_indices = [4] * 6 + [1] * 6
+        outer_indices = [3] * 6 + [2] * 6
+
+        return self.circle_topping_4(preferences, inner_indices, outer_indices)
+
+    def circle_topping_4(self, preferences, inner_indices, outer_indices):
+        """
+        Return 1 pizza of 12 toppings in an inner circle, split horizontally,
+        and 12 in an outer circle, split vertically
         """
 
-        # 0.189 (+ buffer) was minimum i could find for the inner circle to NOT overlap for now
         inner_radius = BUFFER + 0.189 / np.sin(np.pi / 24)
         outer_radius = BUFFER + 0.375 / np.sin(np.pi / 24)
 
         theta = np.pi / 12
-
-        # found angle thru testing around unit circle until appeared ~ vertically split
         outer_angle = 11 * np.pi / 6
 
-        # make a small inner circle, split horizontally
         inner = [
             [
                 inner_radius * np.cos((2 * i + 1) * theta),
                 inner_radius * np.sin((2 * i + 1) * theta),
-                1 + i // 6
+                inner_indices[i]
             ]
-            for i in range(12,24)
+            for i in range(12)
         ]
-        # make a larger outer circle, split vertically
         outer = [
             [
                 outer_radius * np.cos((outer_angle + (2 * i + 1)) * theta),
                 outer_radius * np.sin((outer_angle + (2 * i + 1)) * theta),
-                1 + i // 6
+                outer_indices[i]
             ]
             for i in range(12)
         ]
@@ -341,9 +380,6 @@ class Player:
 
 
 
-
-
-
         # DEFAULT FOR 3 TOPPINGS
         elif self.num_toppings == 3:
          
@@ -380,6 +416,8 @@ class Player:
             for i in range(num_runs_per_approach[3]):
                 pizzas.append(self.lines_topping_4(preferences))
             return pizzas
+
+            # return [self.circle_topping_4_v1(preferences)] * 1 + [self.circle_topping_4_v2(preferences)] * 1 + [self.circle_topping_4_v3(preferences)] * 1 + [self.circle_topping_4_v4(preferences)] * 1 + [self.circle_topping_4_v5(preferences)] * 1 + [self.circle_topping_4_v6(preferences)] * 5
 
 
     #def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
