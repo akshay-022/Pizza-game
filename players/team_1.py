@@ -257,7 +257,119 @@ class Player:
         ]
         pizza = inner + outer
         return pizza
+    def radio_topping_3(self, preference):
+        numbers = [1, 2, 3] #for ids 
+        random.shuffle(numbers)
+        pizza = np.zeros((24, 3))
+        #start w vertical line 
+        y = 1
+        id = numbers.pop()
+        for i in range(4):
+            pizza[i][0] = -.38
+            pizza[i][1] = y
+            pizza[i][2] = id
+            y += .76
+        y=1
+        for i in range(4,8): #add .76 to x 
+            pizza[i][0] = .38
+            pizza[i][1] = y
+            pizza[i][2] = id
+            y += .76
+        #now do our spiral ones 
+        y = -1 
+        x = 1 
+        margin = .76/math.sqrt(2)
+        mini_margin = .38/math.sqrt(2)
+        #start going right 
+        id = numbers.pop()
+        for i in range(8,12):
+            
+            y_below = y - mini_margin 
+            
+            x_below = x - mini_margin
+            pizza[i][0] = x_below
+            pizza[i][1] = y_below
+            pizza[i][2] = id
+            x += margin
+            y -= margin
+        y = -1 
+        x = 1
+        for i in range(12,16):
+            y_above = y + mini_margin
+            x_above = x + mini_margin
+            pizza[i][0] = x_above
+            pizza[i][1] = y_above
+            pizza[i][2] = id
+            x += margin
+            y -= margin 
+        #now going left 
+        y = -1 
+        x = -1 
+        id = numbers.pop()
+        for i in range(16,20):
+            y_below = y - mini_margin 
+            x_below = x + mini_margin
+            pizza[i][0] = x_below
+            pizza[i][1] = y_below
+            pizza[i][2] = id
+            x -= margin
+            y -= margin 
+        y = -1 
+        x = -1 
+        for i in range(20,24):
+            y_above = y + mini_margin
+            x_above = x - mini_margin
+            pizza[i][0] = x_above
+            pizza[i][1] = y_above
+            pizza[i][2] = id
+            x -= margin
+            y -= margin 
+            '''for topping in pizza:
+                print("x position is " + str(topping[0]))
+                print("y position is " + str(topping[1]))
+                print("id is " + str(topping[2]))'''
+        return pizza
 
+    def radio_topping_4(self, preferences):
+        #pizza = np.zeros((24, 3))
+        numbers = [1, 2, 3,4] #for ids 
+        random.shuffle(numbers)
+        #make these in a line and then going out diagonal 
+        pizza = np.zeros((24, 3))
+        #start in the line up
+        y = 1
+        id = numbers.pop()
+        for i in range(6):
+            pizza[i][0] = 0
+            pizza[i][1] = y
+            pizza[i][2] = id
+            y += .76
+        #then down 
+        y = -1
+        id = numbers.pop()
+        for i in range(6,12):
+            pizza[i][0] = 0
+            pizza[i][1] = y
+            pizza[i][2] = id
+            y -= .76
+        #then right
+        y=0
+        x = 1
+        id = numbers.pop()
+        for i in range(12,18):
+            pizza[i][0] = x
+            pizza[i][1] = 0
+            pizza[i][2] = id
+            x += .76
+        #then left 
+        x = -1
+        id = numbers.pop()
+        for i in range(18,24):
+            pizza[i][0] = x
+            pizza[i][1] = 0
+            pizza[i][2] = id
+            x -= .76
+        return pizza
     def lines_topping_2(self, preferences):
         # arrange 6 in two lines
         # arrange 4 in clusters
@@ -461,14 +573,16 @@ class Player:
             print(f'num_runs_per_approach: {num_runs_per_approach}')
 
             pizzas = []
-            for i in range(num_runs_per_approach[0]):
+            for i in range(10):
+                pizzas.append(self.radio_topping_3(preferences))
+            '''for i in range(num_runs_per_approach[0]):
                 pizzas.append(self.circle_topping_3_v1(preferences))
             for i in range(num_runs_per_approach[1]):
                 pizzas.append(self.circle_topping_3_v2(preferences))
             for i in range(num_runs_per_approach[2]):
                 pizzas.append(self.circle_topping_3_v3(preferences))
             for i in range(num_runs_per_approach[3]):
-                pizzas.append(self.lines_topping_3(preferences))
+                pizzas.append(self.lines_topping_3(preferences))'''
             # for i in range(10):
             #     pizzas.append(self.lines_topping_3(preferences))
             return pizzas
@@ -484,7 +598,10 @@ class Player:
             print(f'num_runs_per_approach: {num_runs_per_approach}')
 
             pizzas = []
-            for i in range(num_runs_per_approach[0]):
+            for i in range(10):
+                pizzas.append(self.radio_topping_4(preferences))
+            
+            '''for i in range(num_runs_per_approach[0]):
                 pizzas.append(self.circle_topping_4_v1(preferences))
             for i in range(num_runs_per_approach[1]):
                 pizzas.append(self.circle_topping_4_v2(preferences))
@@ -499,7 +616,7 @@ class Player:
             for i in range(num_runs_per_approach[6]):
                 pizzas.append(self.circle_topping_4_v5(preferences))
             for i in range(num_runs_per_approach[7]):
-                pizzas.append(self.circle_topping_4_v6(preferences))
+                pizzas.append(self.circle_topping_4_v6(preferences))'''
             return pizzas
 
             # return [self.circle_topping_4_v1(preferences)] * 1 + [self.circle_topping_4_v2(preferences)] * 1 + [self.circle_topping_4_v3(preferences)] * 1 + [self.circle_topping_4_v4(preferences)] * 1 + [self.circle_topping_4_v5(preferences)] * 1 + [self.circle_topping_4_v6(preferences)] * 5
