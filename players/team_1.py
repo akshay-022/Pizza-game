@@ -173,6 +173,51 @@ class Player:
         
         return y
 
+
+''''
+def lines_topping_4(self, preferences):
+        pizzas = []
+        pizza = np.zeros((24, 3))
+        x_margin = 1.5
+        # new_y_start_change = (6-math.sqrt(35))/2
+        new_y_start_change = .75 * 4
+        center_size = .375
+        # now lets find the starting point
+        x_pos_left1 = -2.25 - center_size
+        x_pos_left2 = -.75 - center_size
+        x_pos_right1 = .75 + center_size
+        x_pos_right2 = 2.25 + center_size
+
+        y_start = new_y_start_change
+        y = y_start
+        # for i in range(24):
+        for i in range(6):
+            pizza[i][0] = x_pos_left1
+            pizza[i][1] = y
+            pizza[i][2] = 1
+            y -= .76  # to move down
+            # print("x_pos left: " + str(x_pos_left) + "and y " + str(y))
+        y = y_start
+        for j in range(6, 12):
+            pizza[j][0] = x_pos_left2
+            pizza[j][1] = y
+            pizza[j][2] = 2
+            y -= .76  # to move down
+        y = y_start
+        for k in range(12, 18):
+            pizza[k][0] = x_pos_right1
+            pizza[k][1] = y
+            pizza[k][2] = 3
+            y -= .76  # to move down
+        y = y_start
+        for l in range(18, 24):
+            pizza[l][0] = x_pos_right2
+            pizza[l][1] = y
+            pizza[l][2] = 4
+            y -= .76  # to move down
+            # print("x_pos right: " + str(x_pos_right) + "and y " + str(y))
+        return pizza
+'''
             
 
 
