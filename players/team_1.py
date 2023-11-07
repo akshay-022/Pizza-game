@@ -20,38 +20,50 @@ class Player:
         self.calculator = pizza_calculations()
 
     def customer_gen(self, num_cust, rng = None):
-        
+
         """Function in which we create a distribution of customer preferences
 
-        Args:
-            num_cust(int) : the total number of customer preferences you need to create
-            rng(int) : A random seed that you can use to generate your customers. You can choose to not pass this, in that case the seed taken will be self.rng
+       Args:
+           num_cust(int) : the total number of customer preferences you need to create
+           rng(numpy generator object) : A random seed that you can use to generate your customers. You can choose to not pass this, in that case the seed taken will be self.rng
 
-        Returns:
-            preferences_total(list) : List of size [num_cust, 2, num_toppings], having all generated customer preferences
-        """
+       Returns:
+           preferences_total(list) : List of size [num_cust, 2, num_toppings], having all generated customer preferences
+       """
 
         preferences_total = []
 
         if rng is None:
-            np.random.seed(self.rng)
+            # standard norm distribution has mean 0 and variance 1
+            mean_vector = np.zeros(self.num_toppings)
+            # np.eye = Return a 2-D array with ones on the diagonal and zeros elsewhere.
+            covariance_matrix = np.eye(self.num_toppings)
+
+            for i in range(num_cust):
+                preferences = self.rng.multivariate_normal(mean_vector, covariance_matrix)
+
+                # clip to ensure non-negative values
+                preferences = np.clip(preferences, 0, None)
+                # normalize
+                preferences /= preferences.sum()
+
+                preferences_total.append(preferences.tolist())
+
         else:
-            np.random.seed(rng)
+            # standard norm distribution has mean 0 and variance 1
+            mean_vector = np.zeros(self.num_toppings)
+            # np.eye = Return a 2-D array with ones on the diagonal and zeros elsewhere.
+            covariance_matrix = np.eye(self.num_toppings)
 
-        # standard norm distribution has mean 0 and variance 1
-        mean_vector = np.zeros(self.num_toppings)
-        # np.eye = Return a 2-D array with ones on the diagonal and zeros elsewhere.
-        covariance_matrix = np.eye(self.num_toppings)
+            for i in range(num_cust):
+                preferences = rng.multivariate_normal(mean_vector, covariance_matrix)
 
-        for i in range(num_cust):
-            preferences = np.random.multivariate_normal(mean_vector, covariance_matrix)
+                # clip to ensure non-negative values
+                preferences = np.clip(preferences, 0, None)
+                # normalize
+                preferences /= preferences.sum()
 
-            # clip to ensure non-negative values
-            preferences = np.clip(preferences, 0, None)
-            # normalize
-            preferences /= preferences.sum()
-
-            preferences_total.append(preferences.tolist())
+                preferences_total.append(preferences.tolist())
 
         return preferences_total
     def circle_topping_2(self, preferences):
