@@ -57,8 +57,55 @@ class Player:
 
         return preferences_total
 
+    def choose_three(self):
+        pizzas = np.zeros((10, 24, 3))
+
+        pizza_radius = 4
+        for j in range(constants.number_of_initial_pizzas):  # Iterate over each pizza
+            pizza_indiv = np.zeros((24, 3))
+
+            ct = 1
+            for i in range(24):  # Place 24 toppings on each pizza
+                place = True
+                angle_increment = 2 * np.pi / 24
+                angle = i * angle_increment
+
+                # Calculate x, y coordinates
+                x = pizza_radius * np.cos(angle)
+                y = pizza_radius * np.sin(angle)
+
+                if j < 3:
+                    a, b, c = 1, 2, 3
+                elif j < 6:
+                    a, b, c = 2, 3, 1
+                else:
+                    a, b, c = 3, 1, 2
+
+                if i < 12 and i % 2 == 1:
+                    topping_type = a
+                elif i >= 12 and i < 24 and i % 2 == 1:
+                    topping_type = b
+                else:
+                    topping_type = c
+                    y = 0
+                    if ct <= 6:
+                        x = (6.5 - ct) * 0.9 * -1
+                    else:
+                        x = (ct - 6.5) * 0.9
+                    ct += 1
+
+                pizza_indiv[i] = [x, y, topping_type]
+
+            pizzas[j] = pizza_indiv
+
+        return list(pizzas)
+
     def choose_toppings(self, preferences):
         # 10 pizzas, 24 toppings each, 3 values per topping (x, y, type)
+
+        if self.num_toppings == 3:
+            return self.choose_three()
+
         pizzas = np.zeros((10, 24, 3))
 
         pizza_radius = 3
