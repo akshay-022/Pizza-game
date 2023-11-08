@@ -49,6 +49,55 @@ class Player:
 
         return preferences_total
 
+    def choose_four(self):
+        pizzas = np.zeros((10, 24, 3))
+        buff = 0.001
+
+        for j in range(constants.number_of_initial_pizzas):
+
+            if j < 2:
+                inner_toppings = [1] * 6 + [2] * 6
+                outer_toppings = [3] * 6 + [4] * 6
+            elif j < 4:
+                inner_toppings = [4] * 6 + [3] * 6
+                outer_toppings = [2] * 6 + [1] * 6
+            elif j < 6:
+                inner_toppings = [3] * 6 + [1] * 6
+                outer_toppings = [4] * 6 + [2] * 6
+            elif j < 8:
+                inner_toppings = [2] * 6 + [3] * 6
+                outer_toppings = [1] * 6 + [4] * 6
+            else:
+                inner_toppings = [4] * 6 + [2] * 6
+                outer_toppings = [3] * 6 + [1] * 6
+
+            inner_radius = buff + 0.189 / np.sin(np.pi / 24)
+            outer_radius = buff + 0.375 / np.sin(np.pi / 24)
+
+            theta = np.pi / 12
+            outer_angle = 11 * np.pi / 6
+
+            inner = [
+                [
+                    inner_radius * np.cos((2 * i + 1) * theta),
+                    inner_radius * np.sin((2 * i + 1) * theta),
+                    inner_toppings[i]
+                ]
+                for i in range(12)
+            ]
+            outer = [
+                [
+                    outer_radius * np.cos((outer_angle + (2 * i + 1)) * theta),
+                    outer_radius * np.sin((outer_angle + (2 * i + 1)) * theta),
+                    outer_toppings[i]
+                ]
+                for i in range(12)
+            ]
+            pizza = inner + outer
+            pizzas[j] = pizza
+
+        return list(pizzas)
+
     def choose_two(self):
         pizzas = np.zeros((10, 24, 3))
 
