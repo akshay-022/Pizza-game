@@ -82,7 +82,6 @@ class Player:
 
         pizza_radius = 3
         for j in range(constants.number_of_initial_pizzas):  # Iterate over each pizza
-            print("NEW PIZZA")
             pizza_indiv = np.zeros((24, 3))
 
             ct = 1
@@ -105,43 +104,22 @@ class Player:
 
                 if i == 0 or i == 9:
                     topping_type = c
-                    print(x, y, "!!")
                     ends.append(x)
-                # if i == 9:
-                #     topping_type = c
-                #     print(x, y, "!!")
-                #     end = x
                 elif i <= 8:
                     topping_type = a
                 elif i <= 17:
                     topping_type = b
                 else:
                     topping_type = c
-                    # while pizza_calculations.clash_exists(x, y, pizza_indiv, i):
-                    #     dist = self.rng.random()*6
-                    #     x = dist*np.cos(angle)
-                    #     y = dist*np.sin(angle)
-                    #     print("random", x, y)
                     y = 0
                     if ct == 1:
                         x = ends[1] - ((pizza_radius)/5 + 0.55)
                     elif ct == 6:
-                        print("?", ends[0])
                         x = ends[0] + ((pizza_radius)/5 + 0.55)
                     else:
-                        # print("new", )
-
                         x = ends[1] + \
                             ((pizza_radius - 0.75)/3.5 + 0.55) * (ct - 1)
                     ct += 1
-                    # if not ct == 2 or ct == 7:
-                    #     y = 0
-                    #     if ct <= 4:
-                    #         x = (6.5 - ct) * 0.9 * -1
-                    #     else:
-                    #         x = (ct - 6.5) * 0.9
-                    # ct += 1
-                print(i, x, y)
                 pizza_indiv[i] = [x, y, topping_type]
 
             pizzas[j] = pizza_indiv
@@ -208,7 +186,8 @@ class Player:
 
     def choose_and_cut(self, pizzas, remaining_pizza_ids, customer_amounts):
         maximumS = -1000
-        maximumCut = [self.pizza_center[0], self.pizza_center[1], np.pi / 6, remaining_pizza_ids[0]]  # default cut
+        maximumCut = [self.pizza_center[0], self.pizza_center[1],
+                      np.pi / 6, remaining_pizza_ids[0]]  # default cut
         xCenter = self.pizza_center[0]
         yCenter = self.pizza_center[1]
         multiplier = self.multiplier
@@ -227,19 +206,23 @@ class Player:
                         xCord = (xCenter + x * multiplier)
                         yCord = (yCenter - y * multiplier)
                         obtained_pref, slice_areas_toppings = self.calculations.ratio_calculator(pizza,
-                                                                                          [xCord, yCord, angle],
-                                                                                          self.num_toppings, multiplier,
-                                                                                          xCenter, yCenter)
+                                                                                                 [xCord, yCord, angle],
+                                                                                                 self.num_toppings, multiplier,
+                                                                                                 xCenter, yCenter)
                         obtained_pref = np.array(obtained_pref)
                         random_pref, temp = self.calculations.ratio_calculator(pizza, [xCenter, yCenter,
-                                                                                self.rng.random() * 2 * np.pi],
-                                                                        self.num_toppings, multiplier, xCenter, yCenter)
+                                                                                       self.rng.random() * 2 * np.pi],
+                                                                               self.num_toppings, multiplier, xCenter, yCenter)
                         random_pref = np.array(random_pref)
                         required_pref = np.array(customer_amounts)
-                        uniform_pref = np.ones((2, self.num_toppings)) * (12 / self.num_toppings)
-                        b = np.round(np.absolute(required_pref - uniform_pref), 3)
-                        c = np.round(np.absolute(obtained_pref - required_pref), 3)
-                        u = np.round(np.absolute(random_pref - uniform_pref), 3)
+                        uniform_pref = np.ones(
+                            (2, self.num_toppings)) * (12 / self.num_toppings)
+                        b = np.round(np.absolute(
+                            required_pref - uniform_pref), 3)
+                        c = np.round(np.absolute(
+                            obtained_pref - required_pref), 3)
+                        u = np.round(np.absolute(
+                            random_pref - uniform_pref), 3)
                         s = (b - c).sum()
                         if s > maximumS:
                             maximumS = s
