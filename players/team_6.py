@@ -51,9 +51,8 @@ class Player:
 
     def choose_four(self):
         pizzas = np.zeros((10, 24, 3))
-        buff = 0.001
 
-        for j in range(constants.number_of_initial_pizzas):
+        pizza_radius = 3
 
             if j < 2:
                 inner_toppings = [1] * 6 + [2] * 6
@@ -71,11 +70,23 @@ class Player:
                 inner_toppings = [4] * 6 + [2] * 6
                 outer_toppings = [3] * 6 + [1] * 6
 
-            inner_radius = buff + 0.189 / np.sin(np.pi / 24)
-            outer_radius = buff + 0.375 / np.sin(np.pi / 24)
+            ct = 1
+            for i in range(24):  # Place 24 toppings on each pizza
+                place = True
+                angle_increment = 2 * np.pi / 24
+                angle = i * angle_increment
 
-            theta = np.pi / 12
-            outer_angle = 11 * np.pi / 6
+                # Calculate x, y coordinates
+                x = pizza_radius * np.cos(angle)
+                y = pizza_radius * np.sin(angle)
+
+                # Assign topping type based on the number of toppings
+                topping_type = 1 if i < 12 else 2
+
+                # if place:
+                pizza_indiv[i] = [x, y, topping_type]
+
+            pizzas[j] = pizza_indiv
 
             inner = [
                 [
@@ -100,21 +111,31 @@ class Player:
 
     def choose_two(self):
         pizzas = np.zeros((10, 24, 3))
+        buff = 0.001
 
         pizza_radius = 3
 
         for j in range(constants.number_of_initial_pizzas):  # Iterate over each pizza
             pizza_indiv = np.zeros((24, 3))
 
-            ct = 1
-            for i in range(24):  # Place 24 toppings on each pizza
-                place = True
-                angle_increment = 2 * np.pi / 24
-                angle = i * angle_increment
+            if j < 2:
+                inner_toppings = [1] * 6 + [2] * 6
+                outer_toppings = [3] * 6 + [4] * 6
+            elif j < 4:
+                inner_toppings = [4] * 6 + [3] * 6
+                outer_toppings = [2] * 6 + [1] * 6
+            elif j < 6:
+                inner_toppings = [3] * 6 + [1] * 6
+                outer_toppings = [4] * 6 + [2] * 6
+            elif j < 8:
+                inner_toppings = [2] * 6 + [3] * 6
+                outer_toppings = [1] * 6 + [4] * 6
+            else:
+                inner_toppings = [4] * 6 + [2] * 6
+                outer_toppings = [3] * 6 + [1] * 6
 
-                # Calculate x, y coordinates
-                x = pizza_radius * np.cos(angle)
-                y = pizza_radius * np.sin(angle)
+            inner_radius = buff + 0.189 / np.sin(np.pi / 24)
+            outer_radius = buff + 0.375 / np.sin(np.pi / 24)
 
                 # Assign topping type based on the number of toppings
                 topping_type = 1 if i < 12 else 2
