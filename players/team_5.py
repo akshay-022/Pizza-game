@@ -1,12 +1,8 @@
 import constants
-from tokenize import String
-from typing import Tuple, List
 from utils import pizza_calculations
-
 import numpy as np
 from itertools import permutations, combinations
 from math import pi, sin, cos, sqrt
-from scipy.optimize import brute
 
 
 class Player:
@@ -238,7 +234,8 @@ class Player:
         else:
             bounds = radius
             f = lambda x: self._get_error(pizza, angle, np.squeeze(x)[()], relevant_topping_ids, customer_amounts, flipped)
-        minimizer, minimum, _, _ = brute(f, [bounds], Ns=self.NUM_BRUTE_SAMPLES, full_output=True)
+        minimizer = min(np.arange(bounds[0], bounds[1] + 10e-5, (bounds[1] - bounds[0]) / self.NUM_BRUTE_SAMPLES), key=f)
+        minimum = f(minimizer)
         return minimizer, minimum
 
     def _get_cut_default(self, pizzas, remaining_pizza_ids, customer_amounts):
@@ -280,7 +277,7 @@ class Player:
             angle, _ = self._minimize_error(pizza, (pi, 2 * pi), 5, inside_topping_ids, customer_amounts)
             angle_flipped = 3 * pi - angle
             # TODO: Look at radius range impl and why some preferences cause us to place center outside circle (ex: -s10 = 21)
-            radius_range = (sqrt(2) * (1.22 + 0.375), 6 - 4*self.MAX_RADIUS_PAD)
+            radius_range = (sqrt(2) * (1.22 + 0.375), 6 - self.MAX_RADIUS_PAD)
             radius, error = self._minimize_error(pizza, angle, radius_range, outside_topping_ids, customer_amounts)
             radius_flipped, error_flipped = self._minimize_error(pizza, angle_flipped, radius_range, outside_topping_ids, customer_amounts, True)
             if min(error, error_flipped) < error_minimum:
