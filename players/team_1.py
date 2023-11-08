@@ -291,51 +291,55 @@ class Player:
         y = -1 
         x = 1 
         margin = .76/math.sqrt(2)
+        x_margin = .76*math.sqrt(3)/2
+        y_margin = .38
         mini_margin = .38/math.sqrt(2)
+        x_mini_margin = .19
+        y_mini_margin = .38*math.sqrt(3)/2
         #start going right 
         id = numbers.pop()
         for i in range(8,12):
             
-            y_below = y - mini_margin 
+            y_below = y - y_mini_margin 
             
-            x_below = x - mini_margin
+            x_below = x - x_mini_margin
             pizza[i][0] = x_below
             pizza[i][1] = y_below
             pizza[i][2] = id
-            x += margin
-            y -= margin
+            x += x_margin
+            y -= y_margin
         y = -1 
         x = 1
         for i in range(12,16):
-            y_above = y + mini_margin
-            x_above = x + mini_margin
+            y_above = y + y_mini_margin
+            x_above = x + x_mini_margin
             pizza[i][0] = x_above
             pizza[i][1] = y_above
             pizza[i][2] = id
-            x += margin
-            y -= margin 
+            x += x_margin
+            y -= y_margin 
         #now going left 
         y = -1 
         x = -1 
         id = numbers.pop()
         for i in range(16,20):
-            y_below = y - mini_margin 
-            x_below = x + mini_margin
+            y_below = y - y_mini_margin 
+            x_below = x + x_mini_margin
             pizza[i][0] = x_below
             pizza[i][1] = y_below
             pizza[i][2] = id
-            x -= margin
-            y -= margin 
+            x -= x_margin
+            y -= y_margin 
         y = -1 
         x = -1 
         for i in range(20,24):
-            y_above = y + mini_margin
-            x_above = x - mini_margin
+            y_above = y + y_mini_margin
+            x_above = x - x_mini_margin
             pizza[i][0] = x_above
             pizza[i][1] = y_above
             pizza[i][2] = id
-            x -= margin
-            y -= margin 
+            x -= x_margin
+            y -= y_margin 
             '''for topping in pizza:
                 print("x position is " + str(topping[0]))
                 print("y position is " + str(topping[1]))
