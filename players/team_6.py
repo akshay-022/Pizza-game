@@ -179,8 +179,6 @@ class Player:
             else:
                 return self.choose_four()
 
-            # Helper function to get initial points for the first sequence
-
     def choose_and_cut(self, pizzas, remaining_pizza_ids, customer_amounts):
         maximumS = -1000
         maximumCut = [self.pizza_center[0], self.pizza_center[1], np.pi / 6, remaining_pizza_ids[0]]  # default cut
