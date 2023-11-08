@@ -6,21 +6,21 @@ from utils import pizza_calculations
 import math
 import random
 
-#constants
+# constants
 BUFFER = 0.001
+
 
 class Player:
     def __init__(self, num_toppings, rng: np.random.Generator) -> None:
         """Initialise the player"""
         self.rng = rng
         self.num_toppings = num_toppings
-        self.multiplier=40	# Pizza radius = 6*multiplier units
-        self.xCenter = 12*self.multiplier	# Center Point x of pizza
-        self.yCenter = 10*self.multiplier	# Center Point y of pizza
+        self.multiplier = 40  # Pizza radius = 6*multiplier units
+        self.xCenter = 12*self.multiplier  # Center Point x of pizza
+        self.yCenter = 10*self.multiplier  # Center Point y of pizza
         self.calculator = pizza_calculations()
 
-    def customer_gen(self, num_cust, rng = None):
-
+    def customer_gen(self, num_cust, rng=None):
         """Function in which we create a distribution of customer preferences
 
        Args:
@@ -40,7 +40,8 @@ class Player:
             covariance_matrix = np.eye(self.num_toppings)
 
             for i in range(num_cust):
-                preferences = self.rng.multivariate_normal(mean_vector, covariance_matrix)
+                preferences = self.rng.multivariate_normal(
+                    mean_vector, covariance_matrix)
 
                 # clip to ensure non-negative values
                 preferences = np.clip(preferences, 0, None)
@@ -56,7 +57,8 @@ class Player:
             covariance_matrix = np.eye(self.num_toppings)
 
             for i in range(num_cust):
-                preferences = rng.multivariate_normal(mean_vector, covariance_matrix)
+                preferences = rng.multivariate_normal(
+                    mean_vector, covariance_matrix)
 
                 # clip to ensure non-negative values
                 preferences = np.clip(preferences, 0, None)
@@ -66,6 +68,7 @@ class Player:
                 preferences_total.append(preferences.tolist())
 
         return preferences_total
+
     def circle_topping_2(self, preferences):
         """
         Return 1 pizza of 24 toppings in a circle, split horizontally
@@ -269,11 +272,12 @@ class Player:
         ]
         pizza = inner + outer
         return pizza
+
     def radio_topping_3(self, preference):
-        numbers = [1, 2, 3] #for ids 
+        numbers = [1, 2, 3]  # for ids
         random.shuffle(numbers)
         pizza = np.zeros((24, 3))
-        #start w vertical line 
+        # start w vertical line
         y = 1
         id = numbers.pop()
         for i in range(4):
@@ -281,61 +285,61 @@ class Player:
             pizza[i][1] = y
             pizza[i][2] = id
             y += .76
-        y=1
-        for i in range(4,8): #add .76 to x 
+        y = 1
+        for i in range(4, 8):  # add .76 to x
             pizza[i][0] = .38
             pizza[i][1] = y
             pizza[i][2] = id
             y += .76
-        #now do our spiral ones 
-        y = -1 
-        x = 1 
+        # now do our spiral ones
+        y = -1
+        x = 1
         margin = .76/math.sqrt(2)
         mini_margin = .38/math.sqrt(2)
-        #start going right 
+        # start going right
         id = numbers.pop()
-        for i in range(8,12):
-            
-            y_below = y - mini_margin 
-            
+        for i in range(8, 12):
+
+            y_below = y - mini_margin
+
             x_below = x - mini_margin
             pizza[i][0] = x_below
             pizza[i][1] = y_below
             pizza[i][2] = id
             x += margin
             y -= margin
-        y = -1 
+        y = -1
         x = 1
-        for i in range(12,16):
+        for i in range(12, 16):
             y_above = y + mini_margin
             x_above = x + mini_margin
             pizza[i][0] = x_above
             pizza[i][1] = y_above
             pizza[i][2] = id
             x += margin
-            y -= margin 
-        #now going left 
-        y = -1 
-        x = -1 
+            y -= margin
+        # now going left
+        y = -1
+        x = -1
         id = numbers.pop()
-        for i in range(16,20):
-            y_below = y - mini_margin 
+        for i in range(16, 20):
+            y_below = y - mini_margin
             x_below = x + mini_margin
             pizza[i][0] = x_below
             pizza[i][1] = y_below
             pizza[i][2] = id
             x -= margin
-            y -= margin 
-        y = -1 
-        x = -1 
-        for i in range(20,24):
+            y -= margin
+        y = -1
+        x = -1
+        for i in range(20, 24):
             y_above = y + mini_margin
             x_above = x - mini_margin
             pizza[i][0] = x_above
             pizza[i][1] = y_above
             pizza[i][2] = id
             x -= margin
-            y -= margin 
+            y -= margin
             '''for topping in pizza:
                 print("x position is " + str(topping[0]))
                 print("y position is " + str(topping[1]))
@@ -343,12 +347,12 @@ class Player:
         return pizza
 
     def radio_topping_4(self, preferences):
-        #pizza = np.zeros((24, 3))
-        numbers = [1, 2, 3,4] #for ids 
+        # pizza = np.zeros((24, 3))
+        numbers = [1, 2, 3, 4]  # for ids
         random.shuffle(numbers)
-        #make these in a line and then going out diagonal 
+        # make these in a line and then going out diagonal
         pizza = np.zeros((24, 3))
-        #start in the line up
+        # start in the line up
         y = 1
         id = numbers.pop()
         for i in range(6):
@@ -356,32 +360,33 @@ class Player:
             pizza[i][1] = y
             pizza[i][2] = id
             y += .76
-        #then down 
+        # then down
         y = -1
         id = numbers.pop()
-        for i in range(6,12):
+        for i in range(6, 12):
             pizza[i][0] = 0
             pizza[i][1] = y
             pizza[i][2] = id
             y -= .76
-        #then right
-        y=0
+        # then right
+        y = 0
         x = 1
         id = numbers.pop()
-        for i in range(12,18):
+        for i in range(12, 18):
             pizza[i][0] = x
             pizza[i][1] = 0
             pizza[i][2] = id
             x += .76
-        #then left 
+        # then left
         x = -1
         id = numbers.pop()
-        for i in range(18,24):
+        for i in range(18, 24):
             pizza[i][0] = x
             pizza[i][1] = 0
             pizza[i][2] = id
             x -= .76
         return pizza
+
     def lines_topping_2(self, preferences):
         # arrange 6 in two lines
         # arrange 4 in clusters
@@ -423,7 +428,7 @@ class Player:
                 print("this is y " + str(topping[1]))
                 print("this is id " + str(topping[2]))'''
 
-        #commenting out if we use random choice of number of each algo per pizza
+        # commenting out if we use random choice of number of each algo per pizza
         # for x in range(10):
         #     pizzas.append(pizza)
 
@@ -443,7 +448,6 @@ class Player:
 
         # return list of pizzas
 
-
     def lines_topping_3(self, preferences):
         numbers = [1, 2, 3]
         random.shuffle(numbers)
@@ -454,9 +458,9 @@ class Player:
         new_y_start_change = .75 * 4
         center_size = .375
         # now lets find the starting point
-        x_pos_left = -x_margin #- center_size
-        x_pos_middle = 0#center_size
-        x_pos_right = x_margin #+ center_size
+        x_pos_left = -x_margin  # - center_size
+        x_pos_middle = 0  # center_size
+        x_pos_right = x_margin  # + center_size
 
         y_start = new_y_start_change
         y = y_start
@@ -507,7 +511,7 @@ class Player:
         for i in range(6):
             pizza[i][0] = x_pos_left1
             pizza[i][1] = y
-            pizza[i][2] = id 
+            pizza[i][2] = id
             y -= .76  # to move down
             # print("x_pos left: " + str(x_pos_left) + "and y " + str(y))
         y = y_start
@@ -552,7 +556,7 @@ class Player:
 
         return distribution
 
-    #def choose_discard(self, cards: list[str], constraints: list[str]):
+    # def choose_discard(self, cards: list[str], constraints: list[str]):
     def choose_toppings(self, preferences):
         """Function in which we choose position of toppings
 
@@ -578,13 +582,13 @@ class Player:
             #     pizzas.append(self.circle_topping_2(preferences))
             # return pizzas
 
-            pizzas = [self.lines_topping_2(preferences)] * 5 + [self.circle_topping_2(preferences)] * 5
+            pizzas = [self.lines_topping_2(
+                preferences)] * 5 + [self.circle_topping_2(preferences)] * 5
 
             return pizzas
 
-
         elif self.num_toppings == 3:
-         
+
             # num_runs_per_approach = self.list_sum_to_total(10, 4)
             # print(f'num_runs_per_approach: {num_runs_per_approach}')
             #
@@ -604,10 +608,10 @@ class Player:
             # return pizzas
 
             # 2 circles of each type (6) + 2 lines + 2 radial lines
-            pizzas = [self.circle_topping_3_v1(preferences)] * 2 + [self.circle_topping_3_v2(preferences)] * 2 + [self.circle_topping_3_v3(preferences)] * 2 + [self.lines_topping_3(preferences)] * 2 + [self.radio_topping_3(preferences)] * 2
+            pizzas = [self.circle_topping_3_v1(preferences)] * 2 + [self.circle_topping_3_v2(preferences)] * 2 + [self.circle_topping_3_v3(
+                preferences)] * 2 + [self.lines_topping_3(preferences)] * 2 + [self.radio_topping_3(preferences)] * 2
 
             return pizzas
-
 
         elif self.num_toppings == 4:
 
@@ -643,13 +647,13 @@ class Player:
             #     pizzas.append(self.radio_topping_4(preferences))
             # return pizzas
 
-
             # 1 circle of each type (6) + 2 lines + 2 radial lines
-            pizzas = [self.circle_topping_4_v1(preferences)] * 1 + [self.circle_topping_4_v2(preferences)] * 1 + [self.circle_topping_4_v3(preferences)] * 1 + [self.circle_topping_4_v4(preferences)] * 1 + [self.circle_topping_4_v5(preferences)] * 1 + [self.circle_topping_4_v6(preferences)] * 1 + [self.lines_topping_4(preferences)] * 2 + [self.radio_topping_4(preferences)] * 2
+            pizzas = [self.circle_topping_4_v1(preferences)] * 1 + [self.circle_topping_4_v2(preferences)] * 1 + [self.circle_topping_4_v3(preferences)] * 1 + [self.circle_topping_4_v4(preferences)] * 1 + [
+                self.circle_topping_4_v5(preferences)] * 1 + [self.circle_topping_4_v6(preferences)] * 1 + [self.lines_topping_4(preferences)] * 2 + [self.radio_topping_4(preferences)] * 2
 
             return pizzas
 
-    #def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
+    # def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
     def choose_and_cut(self, pizzas, remaining_pizza_ids, customer_amounts):
         """Function which based n current game state returns the distance and angle, the shot must be played
 
@@ -662,39 +666,46 @@ class Player:
             Tuple[int, center, first cut angle]: Return the pizza id you choose, the center of the cut in format [x_coord, y_coord] where both are in inches relative of pizza center of radius 6, the angle of the first cut in radians. 
         """
         maximumS = -1000
-        maximumCut = [self.xCenter, self.yCenter, np.pi/6, remaining_pizza_ids[0]] #default cut
+        maximumCut = [self.xCenter, self.yCenter, np.pi /
+                      6, remaining_pizza_ids[0]]  # default cut
 
         for pizza_id in remaining_pizza_ids:
             pizza = pizzas[pizza_id]
-            for radius in range(0, 6): 
+            for radius in range(0, 6):
                 for x in range(-radius*5, radius*5):
-                    x =  x/5
+                    x = x/5
                     for ySign in range(-1, 2, 2):
                         y = self.circleCoordinates(x, ySign, radius)
                         cut = [x, y, np.pi/6, pizza_id]
-                        
+
                         xCord = (self.xCenter + x*self.multiplier)
                         yCord = (self.yCenter - y*self.multiplier)
-                        obtained_pref, slice_areas_toppings = self.calculator.ratio_calculator(pizza, [xCord, yCord, np.pi/6], self.num_toppings, self.multiplier, self.xCenter, self.yCenter)
+                        obtained_pref, slice_areas_toppings = self.calculator.ratio_calculator(
+                            pizza, [xCord, yCord, np.pi/6], self.num_toppings, self.multiplier, self.xCenter, self.yCenter)
                         obtained_pref = np.array(obtained_pref)
-                        random_pref, temp = self.calculator.ratio_calculator(pizza, [self.xCenter, self.yCenter, self.rng.random()*2*np.pi], self.num_toppings, self.multiplier, self.xCenter, self.yCenter)
+                        random_pref, temp = self.calculator.ratio_calculator(pizza, [self.xCenter, self.yCenter, self.rng.random(
+                        )*2*np.pi], self.num_toppings, self.multiplier, self.xCenter, self.yCenter)
                         random_pref = np.array(random_pref)
                         required_pref = np.array(customer_amounts)
-                        uniform_pref = np.ones((2, self.num_toppings))*(12/self.num_toppings)
-                        b = np.round(np.absolute(required_pref - uniform_pref), 3)
-                        c = np.round(np.absolute(obtained_pref - required_pref), 3)
-                        u = np.round(np.absolute(random_pref - uniform_pref), 3)
+                        uniform_pref = np.ones(
+                            (2, self.num_toppings))*(12/self.num_toppings)
+                        b = np.round(np.absolute(
+                            required_pref - uniform_pref), 3)
+                        c = np.round(np.absolute(
+                            obtained_pref - required_pref), 3)
+                        u = np.round(np.absolute(
+                            random_pref - uniform_pref), 3)
                         s = (b-c).sum()
                         if s > maximumS:
                             maximumS = s
-                            maximumCut = cut           
-        x  = maximumCut[0]
+                            maximumCut = cut
+        x = maximumCut[0]
         y = maximumCut[1]
         theta = maximumCut[2]
         pizza_id = maximumCut[3]
-        return  pizza_id, [x,y], theta
+        return pizza_id, [x, y], theta
 
-    #this function will take in an x, sign of y, radius and return the y coordinate from the equation of a circle
+    # this function will take in an x, sign of y, radius and return the y coordinate from the equation of a circle
     def circleCoordinates(self, x, ySign, radius):
         y = ySign*(math.sqrt((radius**2) - (x**2)))
         return y
