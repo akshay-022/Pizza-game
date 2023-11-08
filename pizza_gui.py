@@ -14,7 +14,7 @@ import copy
 import argparse
 from utils import pizza_calculations
 from players.default_player import Player as default_player
-from players.team_1 import Player as p1
+from players.default_player import Player as p1
 from players.team_2 import Player as p2
 from players.team_3 import Player as p3
 from players.team_4 import Player as p4
