@@ -20,7 +20,6 @@ class Player:
         self.pizza_radius = 6 * self.multiplier
         self.topping_radius = 0.375
         self.pizza_center = [12 * self.multiplier, 10 * self.multiplier]
-        self.sequence = 0
         self.calculations = pizza_calculations()
 
     def customer_gen(self, num_cust, rng=None):
@@ -180,33 +179,48 @@ class Player:
             else:
                 return self.choose_four()
 
-    def choose_and_cut(self, pizzas, remaining_pizza_ids, customer_amounts):
-        best_score = -float('inf')
-        best_pizza = None
-        best_cut = None
-        best_angle = None
-        pizza_id = remaining_pizza_ids[0]
-        current_pizza = pizzas[pizza_id]
-        # Start with center and quadrants
-        cut_points = [self.pizza_center] + self.get_quadrant_centers()
-        self.sequence = 0
+            # Helper function to get initial points for the first sequence
 
-        while self.sequence < 6:
-            print("Sequence: " + str(self.sequence))
-            new_cut_points = []
-            for point in cut_points:
-                print(point)
-                angle, score = self.find_optimal_cut_angle(
-                    current_pizza, point[0], point[1], customer_amounts)
-                print(str(angle))
-                if score > best_score:
-                    best_score = score
-                    best_cut = point
-                    best_angle = angle
-            # Generate new points around the current point for next sequence
-            new_cut_points += self.generate_new_points_around(best_cut)
-            cut_points = new_cut_points
-            self.sequence += 1
-            print("Best Cut: " + str(best_cut) +
-                  " Best Angle: " + str(best_angle))
-        return pizza_id, best_cut, best_angle
+    def choose_and_cut(self, pizzas, remaining_pizza_ids, customer_amounts):
+        maximumS = -1000
+        maximumCut = [self.pizza_center[0], self.pizza_center[1], np.pi / 6, remaining_pizza_ids[0]]  # default cut
+        xCenter = self.pizza_center[0]
+        yCenter = self.pizza_center[1]
+        multiplier = self.multiplier
+
+        pizza = pizzas[remaining_pizza_ids[0]]
+        pizza_id = remaining_pizza_ids[0]
+        for radius in range(0, 6):
+            # Increase the steps to 24 in every direction for the radius
+            for x in np.linspace(-radius, radius, 24):
+                for ySign in range(-1, 2, 2):
+                    y = ySign * (math.sqrt((radius**2) - (x**2)))
+                    # Consider every 5 degree angle
+                    for angle in np.arange(0, 2 * np.pi, np.radians(5)):
+                        cut = [x, y, angle, pizza_id]
+
+                        xCord = (xCenter + x * multiplier)
+                        yCord = (yCenter - y * multiplier)
+                        obtained_pref, slice_areas_toppings = self.calculations.ratio_calculator(pizza,
+                                                                                          [xCord, yCord, angle],
+                                                                                          self.num_toppings, multiplier,
+                                                                                          xCenter, yCenter)
+                        obtained_pref = np.array(obtained_pref)
+                        random_pref, temp = self.calculations.ratio_calculator(pizza, [xCenter, yCenter,
+                                                                                self.rng.random() * 2 * np.pi],
+                                                                        self.num_toppings, multiplier, xCenter, yCenter)
+                        random_pref = np.array(random_pref)
+                        required_pref = np.array(customer_amounts)
+                        uniform_pref = np.ones((2, self.num_toppings)) * (12 / self.num_toppings)
+                        b = np.round(np.absolute(required_pref - uniform_pref), 3)
+                        c = np.round(np.absolute(obtained_pref - required_pref), 3)
+                        u = np.round(np.absolute(random_pref - uniform_pref), 3)
+                        s = (b - c).sum()
+                        if s > maximumS:
+                            maximumS = s
+                            maximumCut = cut
+        x = maximumCut[0]
+        y = maximumCut[1]
+        theta = maximumCut[2]
+        pizza_id = maximumCut[3]
+        return pizza_id, [x, y], theta
