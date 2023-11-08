@@ -81,14 +81,16 @@ class Player:
     def choose_three(self):
         pizzas = np.zeros((10, 24, 3))
 
-        pizza_radius = 4
+        pizza_radius = 3
         for j in range(constants.number_of_initial_pizzas):  # Iterate over each pizza
+            print("NEW PIZZA")
             pizza_indiv = np.zeros((24, 3))
 
             ct = 1
+            ends = []
+            prev = 0
             for i in range(24):  # Place 24 toppings on each pizza
-                place = True
-                angle_increment = 2 * np.pi / 24
+                angle_increment = 2 * np.pi / 18
                 angle = i * angle_increment
 
                 # Calculate x, y coordinates
@@ -102,19 +104,45 @@ class Player:
                 else:
                     a, b, c = 3, 1, 2
 
-                if i < 12 and i % 2 == 1:
+                if i == 0 or i == 9:
+                    topping_type = c
+                    print(x, y, "!!")
+                    ends.append(x)
+                # if i == 9:
+                #     topping_type = c
+                #     print(x, y, "!!")
+                #     end = x
+                elif i <= 8:
                     topping_type = a
-                elif i >= 12 and i < 24 and i % 2 == 1:
+                elif i <= 17:
                     topping_type = b
                 else:
                     topping_type = c
+                    # while pizza_calculations.clash_exists(x, y, pizza_indiv, i):
+                    #     dist = self.rng.random()*6
+                    #     x = dist*np.cos(angle)
+                    #     y = dist*np.sin(angle)
+                    #     print("random", x, y)
                     y = 0
-                    if ct <= 6:
-                        x = (6.5 - ct) * 0.9 * -1
+                    if ct == 1:
+                        x = ends[1] - ((pizza_radius)/5 + 0.55)
+                    elif ct == 6:
+                        print("?", ends[0])
+                        x = ends[0] + ((pizza_radius)/5 + 0.55)
                     else:
-                        x = (ct - 6.5) * 0.9
-                    ct += 1
+                        # print("new", )
 
+                        x = ends[1] + \
+                            ((pizza_radius - 0.75)/3.5 + 0.55) * (ct - 1)
+                    ct += 1
+                    # if not ct == 2 or ct == 7:
+                    #     y = 0
+                    #     if ct <= 4:
+                    #         x = (6.5 - ct) * 0.9 * -1
+                    #     else:
+                    #         x = (ct - 6.5) * 0.9
+                    # ct += 1
+                print(i, x, y)
                 pizza_indiv[i] = [x, y, topping_type]
 
             pizzas[j] = pizza_indiv
@@ -170,15 +198,14 @@ class Player:
 
         return list(pizzas)
 
-
     def choose_toppings(self, preferences):
-            # 10 pizzas, 24 toppings each, 3 values per topping (x, y, type)
-            if self.num_toppings == 2:
-                return self.choose_two()
-            elif self.num_toppings == 3:
-                return self.choose_three()
-            else:
-                return self.choose_four()
+        # 10 pizzas, 24 toppings each, 3 values per topping (x, y, type)
+        if self.num_toppings == 2:
+            return self.choose_two()
+        elif self.num_toppings == 3:
+            return self.choose_three()
+        else:
+            return self.choose_four()
 
     def choose_and_cut(self, pizzas, remaining_pizza_ids, customer_amounts):
         best_score = -float('inf')
