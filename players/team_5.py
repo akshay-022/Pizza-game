@@ -7,7 +7,6 @@ import numpy as np
 from itertools import permutations, combinations
 from math import pi, sin, cos, sqrt
 from scipy.optimize import brute
-import statistics
 
 
 class Player:
@@ -157,8 +156,6 @@ class Player:
                 final_toppings.append(helper(all_toppings))
         # doubling/capping in case rounding causes sum to be over/under 10
         return (final_toppings*2)[0:10]
-        # perms = list(permutations([1,2,3]))*2
-        # return [helper(perm) for perm in perms[0:10]]
 
     def _get_topping_4(self, ranking_map):
         def helper(categories):
@@ -258,10 +255,11 @@ class Player:
         for pizza_id in remaining_pizza_ids:
             pizza = pizzas[pizza_id]
             inside_topping_ids = [pizza[0][2] - 1, pizza[2][2] - 1]
-            outside_topping_id = [pizza[15][2] - 1]
+            outside_topping_id = [pizza[16][2] - 1]
             angle, _ = self._minimize_error(pizza, (pi, 2 * pi), 5, inside_topping_ids, customer_amounts)
             angle_flipped = 3 * pi - angle
-            radius_range = (sqrt(2) * (1.45 + 0.375), 6 - self.MAX_RADIUS_PAD) # 1.45 is radius from center of pizza to center of topping in outer ring
+            # TODO: Look at radius range impl and why some preferences cause us to place center outside circle (ex: -s10 = 21)
+            radius_range = (sqrt(2) * (1.45 + 0.375), 6 - 3*self.MAX_RADIUS_PAD) # 1.45 is radius from center of pizza to center of topping in outer ring
             radius, error = self._minimize_error(pizza, angle, radius_range, outside_topping_id, customer_amounts)
             radius_flipped, error_flipped = self._minimize_error(pizza, angle_flipped, radius_range, outside_topping_id, customer_amounts, True)
             if min(error, error_flipped) < error_minimum:
@@ -281,7 +279,8 @@ class Player:
             outside_topping_ids = [pizza[12][2] - 1, pizza[18][2] - 1]
             angle, _ = self._minimize_error(pizza, (pi, 2 * pi), 5, inside_topping_ids, customer_amounts)
             angle_flipped = 3 * pi - angle
-            radius_range = (sqrt(2) * (1.22 + 0.375), 6 - self.MAX_RADIUS_PAD)
+            # TODO: Look at radius range impl and why some preferences cause us to place center outside circle (ex: -s10 = 21)
+            radius_range = (sqrt(2) * (1.22 + 0.375), 6 - 4*self.MAX_RADIUS_PAD)
             radius, error = self._minimize_error(pizza, angle, radius_range, outside_topping_ids, customer_amounts)
             radius_flipped, error_flipped = self._minimize_error(pizza, angle_flipped, radius_range, outside_topping_ids, customer_amounts, True)
             if min(error, error_flipped) < error_minimum:
