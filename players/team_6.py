@@ -152,6 +152,7 @@ class Player:
 
         pizza_radius = 3
         for j in range(constants.number_of_initial_pizzas):  # Iterate over each pizza
+            print("NEW PIZZA")
             pizza_indiv = np.zeros((24, 3))
 
             ct = 1
@@ -181,6 +182,11 @@ class Player:
                     topping_type = b
                 else:
                     topping_type = c
+                    # while pizza_calculations.clash_exists(x, y, pizza_indiv, i):
+                    #     dist = self.rng.random()*6
+                    #     x = dist*np.cos(angle)
+                    #     y = dist*np.sin(angle)
+                    #     print("random", x, y)
                     y = 0
                     if ct == 1:
                         x = ends[1] - ((pizza_radius)/5 + 0.55)
