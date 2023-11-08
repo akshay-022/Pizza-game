@@ -51,12 +51,8 @@ class gui():
         # self.pizza_cuts = list(np.zeros((constants.number_of_initial_pizzas ,3)))           #Here cuts positions are absolute and NOT WRT pizza centers, as it is much easier to deal with them that way. It we are not using gui, we assume self.x, self.y =0 and self.multiplier = 1
         self.customer_id = 0
         self.player_instance = None
-<<<<<<< HEAD
         self.preferences_100 = None
-        #Inititalise preferences in the begining only
-=======
         # Inititalise preferences in the begining only
->>>>>>> 871c060 (removing comment)
         self.click_indic = 0
         self.final_preferences = []
         self.pizza_choice_order = []
@@ -287,12 +283,8 @@ class gui():
                                     7*multiplier_small, text=str(pizza_id), fill="black", font=('Helvetica 15 bold'))
 
     def auto_pizza(self):
-<<<<<<< HEAD
-        self.pizzas[self.pizza_id] = self.auto_player.choose_toppings(self.preferences_100)[0]
-=======
         self.pizzas[self.pizza_id] = self.auto_player.choose_toppings(
-            self.all_player_instances[self.generator_number].customer_gen(100, self.rng_generator_100))[0]
->>>>>>> 871c060 (removing comment)
+            self.preferences_100)[0]
         self.pizza_id = self.pizza_id + 1
         self.topping_id = 0
         self.label.config(text="Make pizza number "+str(self.pizza_id) + " with "+str(
@@ -364,28 +356,19 @@ class gui():
         self.num_player = self.options_player.index(self.type_player) - 1
         # print("self.num_player", self.num_player)
         self.num_toppings = int(self.num_p.get())
-<<<<<<< HEAD
-        self.all_player_instances = [ default_player(self.num_toppings, self.rng), p1(self.num_toppings, self.rng), p2(self.num_toppings, self.rng), p3(self.num_toppings, self.rng), p4(self.num_toppings, self.rng), p5(self.num_toppings, self.rng), p6(self.num_toppings, self.rng)]
-        #self.preferences = np.zeros((constants.number_of_initial_pizzas, 2, self.num_toppings))
-        self.preferences = self.all_player_instances[self.generator_number].customer_gen(10, self.rng_generator_10)
-        self.preferences_100 = self.all_player_instances[self.generator_number].customer_gen(100, self.rng_generator_100)
-=======
         self.all_player_instances = [default_player(self.num_toppings, self.rng), p1(self.num_toppings, self.rng), p2(self.num_toppings, self.rng), p3(
             self.num_toppings, self.rng), p4(self.num_toppings, self.rng), p5(self.num_toppings, self.rng), p6(self.num_toppings, self.rng)]
         # self.preferences = np.zeros((constants.number_of_initial_pizzas, 2, self.num_toppings))
         self.preferences = self.all_player_instances[self.generator_number].customer_gen(
             10, self.rng_generator_10)
->>>>>>> 871c060 (removing comment)
+        self.preferences_100 = self.all_player_instances[self.generator_number].customer_gen(
+            100, self.rng_generator_100)
         self.initialise_player(self.num_player, self.num_player)
         if self.type_player != "custom_player":
             # self.pizzas = self.player.create_pizzas(self.num_toppings)      #This line should come in other pizza_game.py. There te self gets updated and transferred here.
             self.button.destroy()
-<<<<<<< HEAD
-            self.pizzas = self.player_instance.choose_toppings(self.preferences_100)
-=======
             self.pizzas = self.player_instance.choose_toppings(
-                self.all_player_instances[self.generator_number].customer_gen(100, self.rng_generator_100))
->>>>>>> 871c060 (removing comment)
+                self.preferences_100)
             self.pizzas_drawn = constants.number_of_initial_pizzas
             clash_exists_overall = False
             for i in range(constants.number_of_initial_pizzas):
@@ -470,16 +453,12 @@ class gui():
         for i in range(len(self.cuts)):
             if list(self.cuts[i]) == [0, 0, 0]:
                 options_pizza.append(i)
-<<<<<<< HEAD
-        pizza_id, center, theta = self.player_instance.choose_and_cut(self.pizzas, options_pizza, self.preferences[self.customer_id])
+        pizza_id, center, theta = self.player_instance.choose_and_cut(
+            self.pizzas, options_pizza, self.preferences[self.customer_id])
         center_x_temp = center[0]
         center_y_temp = center[1]
         if center_x_temp**2 + center_y_temp**2 > 36:
             print("You are trying to choose a center outside the pizza!")
-=======
-        pizza_id, center, theta = self.player_instance.choose_and_cut(
-            self.pizzas, options_pizza, self.preferences[self.customer_id])
->>>>>>> 871c060 (removing comment)
         self.pizza_id = pizza_id
         self.cuts[pizza_id][0] = (self.x + center[0]*self.multiplier)
         self.cuts[pizza_id][1] = (self.y - center[1]*self.multiplier)
