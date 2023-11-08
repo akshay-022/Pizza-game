@@ -74,6 +74,7 @@ class Player:
         Return 1 pizza of 24 toppings in a circle, split horizontally
         """
         radius = BUFFER + 0.375 / np.sin(np.pi / 24)
+        theta = np.pi / 24
         angle = 0  # use np.pi/2 to make a vertical half
         pizza = [
             [
@@ -559,6 +560,8 @@ class Player:
     def choose_toppings(self, preferences):
         """Function in which we choose position of toppings
 
+        Args:
+            num_toppings(int) : the total number of different topics chosen among 2, 3 and 4
             preferences(list) : List of size 100*2*num_toppings for 100 generated preference pairs(actual amounts) of customers.
 
         Returns:
@@ -583,6 +586,8 @@ class Player:
                 preferences)] * 5 + [self.circle_topping_2(preferences)] * 5
 
             return pizzas
+
+    # def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
 
         elif self.num_toppings == 3:
 

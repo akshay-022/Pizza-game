@@ -49,26 +49,13 @@ class Player:
 
         return preferences_total
 
-    def choose_four(self):
+    def choose_two(self):
         pizzas = np.zeros((10, 24, 3))
 
         pizza_radius = 3
 
-            if j < 2:
-                inner_toppings = [1] * 6 + [2] * 6
-                outer_toppings = [3] * 6 + [4] * 6
-            elif j < 4:
-                inner_toppings = [4] * 6 + [3] * 6
-                outer_toppings = [2] * 6 + [1] * 6
-            elif j < 6:
-                inner_toppings = [3] * 6 + [1] * 6
-                outer_toppings = [4] * 6 + [2] * 6
-            elif j < 8:
-                inner_toppings = [2] * 6 + [3] * 6
-                outer_toppings = [1] * 6 + [4] * 6
-            else:
-                inner_toppings = [4] * 6 + [2] * 6
-                outer_toppings = [3] * 6 + [1] * 6
+        for j in range(constants.number_of_initial_pizzas):  # Iterate over each pizza
+            pizza_indiv = np.zeros((24, 3))
 
             ct = 1
             for i in range(24):  # Place 24 toppings on each pizza
@@ -79,63 +66,6 @@ class Player:
                 # Calculate x, y coordinates
                 x = pizza_radius * np.cos(angle)
                 y = pizza_radius * np.sin(angle)
-
-                # Assign topping type based on the number of toppings
-                topping_type = 1 if i < 12 else 2
-
-                # if place:
-                pizza_indiv[i] = [x, y, topping_type]
-
-            pizzas[j] = pizza_indiv
-
-            inner = [
-                [
-                    inner_radius * np.cos((2 * i + 1) * theta),
-                    inner_radius * np.sin((2 * i + 1) * theta),
-                    inner_toppings[i]
-                ]
-                for i in range(12)
-            ]
-            outer = [
-                [
-                    outer_radius * np.cos((outer_angle + (2 * i + 1)) * theta),
-                    outer_radius * np.sin((outer_angle + (2 * i + 1)) * theta),
-                    outer_toppings[i]
-                ]
-                for i in range(12)
-            ]
-            pizza = inner + outer
-            pizzas[j] = pizza
-
-        return list(pizzas)
-
-    def choose_two(self):
-        pizzas = np.zeros((10, 24, 3))
-        buff = 0.001
-
-        pizza_radius = 3
-
-        for j in range(constants.number_of_initial_pizzas):  # Iterate over each pizza
-            pizza_indiv = np.zeros((24, 3))
-
-            if j < 2:
-                inner_toppings = [1] * 6 + [2] * 6
-                outer_toppings = [3] * 6 + [4] * 6
-            elif j < 4:
-                inner_toppings = [4] * 6 + [3] * 6
-                outer_toppings = [2] * 6 + [1] * 6
-            elif j < 6:
-                inner_toppings = [3] * 6 + [1] * 6
-                outer_toppings = [4] * 6 + [2] * 6
-            elif j < 8:
-                inner_toppings = [2] * 6 + [3] * 6
-                outer_toppings = [1] * 6 + [4] * 6
-            else:
-                inner_toppings = [4] * 6 + [2] * 6
-                outer_toppings = [3] * 6 + [1] * 6
-
-            inner_radius = buff + 0.189 / np.sin(np.pi / 24)
-            outer_radius = buff + 0.375 / np.sin(np.pi / 24)
 
                 # Assign topping type based on the number of toppings
                 topping_type = 1 if i < 12 else 2
