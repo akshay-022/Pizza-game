@@ -151,7 +151,7 @@ class Player:
                 for i in range(ranking_map[key]):
                     final_toppings.append(helper(all_toppings))
                     # doubling/capping in case rounding causes sum to be over/under 10
-                    return (final_toppings*2)[0:10]
+            return (final_toppings*2)[0:10]
         # default if issue with distribution analysis
         perms = list(permutations([1,2,3]))*2
         return [helper(perm) for perm in perms[0:10]]
