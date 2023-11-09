@@ -11,8 +11,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "justMyCode": false,
-            "args": ["-g", "True", "-s10", "2"]
+            "justMyCode": true,
+            "args": ["-g", "True", "-s10", "21"]
         }
     ]
 }
