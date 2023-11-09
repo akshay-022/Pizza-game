@@ -102,7 +102,6 @@ class Player:
                 num_pizzas -= 1
             ranking_map[key] = rounded
 
-    # TODO: Verify that we are using the right metric to pick the middle two ingredients- line 122
     def _get_center_ingredients(self, preference, ranking_map):
         """
         :param preference:
@@ -111,7 +110,7 @@ class Player:
             Two ingredients should be in the center when for ingredient x,y
             (x_a - y_a) + (y_b - x_b) is maxed for all combinations of ingredients.
         """
-        max_satisfaction_diff = 0
+        max_satisfaction_diff = -1
         best_pairing = (0, 0)
         for ranking in ranking_map.keys():
             satisfaction_diff = (abs(preference[0][ranking[0]-1] - preference[0][ranking[1]-1]) +
@@ -145,13 +144,17 @@ class Player:
             arc = self._draw_topping(0.25*pi, 0.75*pi, 8, categories[2])
             return inner + outer + arc
         final_toppings = []
-        for key in ranking_map.keys():
-            remaining_toppings = [num+1 for num in range(self.num_toppings) if num+1 not in key]
-            all_toppings = list(key) + remaining_toppings
-            for i in range(ranking_map[key]):
-                final_toppings.append(helper(all_toppings))
-        # doubling/capping in case rounding causes sum to be over/under 10
-        return (final_toppings*2)[0:10]
+        if ranking_map:
+            for key in ranking_map.keys():
+                remaining_toppings = [num+1 for num in range(self.num_toppings) if num+1 not in key]
+                all_toppings = list(key) + remaining_toppings
+                for i in range(ranking_map[key]):
+                    final_toppings.append(helper(all_toppings))
+                    # doubling/capping in case rounding causes sum to be over/under 10
+                    return (final_toppings*2)[0:10]
+        # default if issue with distribution analysis
+        perms = list(permutations([1,2,3]))*2
+        return [helper(perm) for perm in perms[0:10]]
 
     def _get_topping_4(self, ranking_map):
         def helper(categories):
@@ -166,15 +169,16 @@ class Player:
             # used 4 to move the arc outer. may wanna change this.
             return inner + outer + arc
 
-        final_toppings = []
-        for key in ranking_map.keys():
-            remaining_toppings = [num+1 for num in range(self.num_toppings) if num+1 not in key]
-            all_toppings = list(key) + remaining_toppings
-            for i in range(ranking_map[key]):
-                final_toppings.append(helper(all_toppings))
-        # doubling/capping in case rounding causes sum to be over/under 10
-        # Uncomment this line and comment out bottom two to choose pizzas based on dist
-        #return (final_toppings*2)[0:10]
+        if ranking_map:
+            final_toppings = []
+            for key in ranking_map.keys():
+                remaining_toppings = [num+1 for num in range(self.num_toppings) if num+1 not in key]
+                all_toppings = list(key) + remaining_toppings
+                for i in range(ranking_map[key]):
+                    final_toppings.append(helper(all_toppings))
+            # doubling/capping in case rounding causes sum to be over/under 10
+            return (final_toppings*2)[0:10]
+        # default if issue with distribution analysis
         perms = list(permutations([1,2,3,4]))
         return [helper(perm) for perm in perms[0:10]]
 
@@ -188,7 +192,11 @@ class Player:
         Returns:
             pizzas(list) : List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping center, y coordinate of topping center, topping number of topping(1/2/3/4) (Note that it starts from 1, not 0)]
         """
-        ranking_map = self._analyze_distribution(preferences)
+        ranking_map = None
+        try:
+            ranking_map = self._analyze_distribution(preferences)
+        except:
+            print("Unexpected formatting received for distribution of preferences")
         if self.num_toppings == 2:
             return self._get_topping_2(preferences)
         elif self.num_toppings == 3:
@@ -255,7 +263,6 @@ class Player:
             outside_topping_id = [pizza[16][2] - 1]
             angle, _ = self._minimize_error(pizza, (pi, 2 * pi), 5, inside_topping_ids, customer_amounts)
             angle_flipped = 3 * pi - angle
-            # TODO: Look at radius range impl and why some preferences cause us to place center outside circle (ex: -s10 = 21)
             radius_range = (sqrt(2) * (1.45 + 0.375), 6 - self.MAX_RADIUS_PAD) # 1.45 is radius from center of pizza to center of topping in outer ring
             radius, error = self._minimize_error(pizza, angle, radius_range, outside_topping_id, customer_amounts)
             radius_flipped, error_flipped = self._minimize_error(pizza, angle_flipped, radius_range, outside_topping_id, customer_amounts, True)
@@ -276,7 +283,6 @@ class Player:
             outside_topping_ids = [pizza[12][2] - 1, pizza[18][2] - 1]
             angle, _ = self._minimize_error(pizza, (pi, 2 * pi), 5, inside_topping_ids, customer_amounts)
             angle_flipped = 3 * pi - angle
-            # TODO: Look at radius range impl and why some preferences cause us to place center outside circle (ex: -s10 = 21)
             radius_range = (sqrt(2) * (1.22 + 0.375), 6 - self.MAX_RADIUS_PAD)
             radius, error = self._minimize_error(pizza, angle, radius_range, outside_topping_ids, customer_amounts)
             radius_flipped, error_flipped = self._minimize_error(pizza, angle_flipped, radius_range, outside_topping_ids, customer_amounts, True)
