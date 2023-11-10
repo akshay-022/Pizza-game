@@ -26,6 +26,7 @@ for i in range(1,7):
     for k in [2,3,4]:
         for j in [0,1,3,4]: #placeholder for whatever tournament conditions we have.
             for run in range(30):
+                print(f"Player {i},Toppings {k}, Distribution {j}, Run {run}.....")
                 args.player = i
                 args.num_toppings = k
                 args.generator_number = j
