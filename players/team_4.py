@@ -16,44 +16,9 @@ class Player:
         self.multiplier = 40
         self.x_center = 12*self.multiplier	# Center Point x of pizza
         self.y_center = 10*self.multiplier	# Center Point y of pizza
-
-    # def customer_gen(self, num_cust, rng = None):
-        
-    #     """Function in which we create a distribution of customer preferences
-
-    #     Args:
-    #         num_cust(int) : the total number of customer preferences you need to create
-    #         rng(int) : A random seed that you can use to generate your customers. You can choose to not pass this, in that case the seed taken will be self.rng
-
-    #     Returns:
-    #         preferences_total(list) : List of size [num_cust, 2, num_toppings], having all generated customer preferences
-    #     """
-    #     preferences_total = []
-    #     if rng==None:
-    #         for i in range(num_cust):
-    #             preferences_1 = self.rng.random((self.num_toppings,))
-    #             preferences_1 = 12*preferences_1/np.sum(preferences_1)
-    #             preferences_2 = self.rng.random((self.num_toppings,))
-    #             preferences_2 = 12*preferences_2/np.sum(preferences_2)
-    #             preferences = [preferences_1, preferences_2]
-    #             equal_prob = self.rng.random()
-    #             if equal_prob <= 0.0:
-    #                 preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
-    #             preferences_total.append(preferences)
-    #     else : 
-    #         for i in range(num_cust):
-    #             preferences_1 = rng.random((self.num_toppings,))
-    #             preferences_1 = 12*preferences_1/np.sum(preferences_1)
-    #             preferences_2 = rng.random((self.num_toppings,))
-    #             preferences_2 = 12*preferences_2/np.sum(preferences_2)
-    #             preferences = [preferences_1, preferences_2]
-    #             equal_prob = rng.random()
-    #             if equal_prob <= 0.0:       #change this if you want toppings to show up
-    #                 preferences = (np.ones((2,self.num_toppings))*12/self.num_toppings).tolist()
-    #             preferences_total.append(preferences) 
-    #     return preferences_total
-
-        
+        #self._build_lut()
+        self.lut = np.load(f'lut{self.num_toppings}.npy') if self.num_toppings > 2 else None
+       
     def customer_gen(self, num_cust, rng=None, alpha=2, beta=2):
         """
         Function to create non-uniform customer preferences using a beta distribution.
@@ -89,7 +54,7 @@ class Player:
 
         return preferences_total
 
-    def toppings_2(self):
+    def _toppings_2(self):
         pizzas = np.zeros((10, 24, 3))
 
         for j in range(constants.number_of_initial_pizzas):
@@ -105,7 +70,7 @@ class Player:
 
         return list(pizzas)
 
-    def toppings_3(self, prefs):
+    def _toppings_3(self, prefs):
         pizzas = np.zeros((10, 24, 3))
 
         for j in range(constants.number_of_initial_pizzas):
@@ -135,7 +100,7 @@ class Player:
         return list(pizzas)
 
 
-    def toppings_4(self, prefs):
+    def _toppings_4(self, prefs):
         #arr = np.stack(prefs)
         #corr = np.corrcoef(arr, rowvar=False)
         #idx = np.argsort(corr)
@@ -159,11 +124,10 @@ class Player:
         return list(pizzas)
         
 
-    def opt_ratio(self, amounts):
+    def _opt_ratio(self, amounts):
         p, q, n = amounts[0], amounts[1], self.num_toppings
         return np.array([0.5 * (p[i] - q[i]) + 12 / n for i in range(n)]) 
 
-    #def choose_discard(self, cards: list[str], constraints: list[str]):
     def choose_toppings(self, preferences):
         """Function in which we choose position of toppings
 
@@ -176,34 +140,23 @@ class Player:
         """
 
         if self.num_toppings == 2:
-            return self.toppings_2()
+            return self._toppings_2()
 
-        pref_opt = [self.opt_ratio(p) for p in preferences]
+        pref_opt = [self._opt_ratio(p) for p in preferences]
         
         if self.num_toppings == 3:
-            return self.toppings_3(pref_opt)
-        if self.num_toppings == 4:
-            return self.toppings_4(pref_opt)
+            return self._toppings_3(pref_opt)
         else:
-            for j in range(constants.number_of_initial_pizzas):
-                        pizza_indiv = np.zeros((24,3))
-                        i = 0
-                        while i<24:
-                            angle = self.rng.random()*2*np.pi
-                            dist = self.rng.random()*6
-                            x = dist*np.cos(angle)
-                            y = dist*np.sin(angle)
-                            clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
-                            if not clash_exists:
-                                pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
-                                i = i+1
-                        pizza_indiv = np.array(pizza_indiv)
-                        pizzas[j] = pizza_indiv
+            return self._toppings_4(pref_opt)
 
-        return list(pizzas)
+    def _cut2(self, pizzas, remaining_pizza_ids, customer_amounts):
+        pref = self._opt_ratio(customer_amounts)
+        angle = pref[0] / 12 * np.pi
+        dist = 4.75
+        x = dist*np.cos(np.pi + angle)
+        y = dist*np.sin(np.pi + angle)
 
-
-    #def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
+        return remaining_pizza_ids[0], [x, y], angle
 
     def choose_and_cut(self, pizzas, remaining_pizza_ids, customer_amounts):
         """Function which based n current game state returns the distance and angle, the shot must be played
@@ -216,6 +169,8 @@ class Player:
         Returns:
             Tuple[int, center, first cut angle]: Return the pizza id you choose, the center of the cut in format [x_coord, y_coord] where both are in inches relative of pizza center of radius 6, the angle of the first cut in radians. 
         """
+        if self.num_toppings == 2:
+            return self._cut2(pizzas, remaining_pizza_ids, customer_amounts)
         best_S = -np.inf
         best_cut = None
         delta = 6 / N
@@ -230,28 +185,15 @@ class Player:
                 y = d * np.sin(angle)
 
                 for k in range(N):
-                    rotation = theta * k
+                    rotation = (np.pi * k) / (2 * N)
                     cut = [x, y, rotation]
 
                     x_mod = (self.x_center + x * self.multiplier)
                     y_mod = (self.y_center - y * self.multiplier)
                     cut_mod = [x_mod, y_mod, rotation]
-
-                    obtained_pref = np.array(pizza_calculations().ratio_calculator(
-                                        pizzas[pizza_id], 
-                                        cut_mod, 
-                                        self.num_toppings, 
-                                        self.multiplier, 
-                                        self.x_center, 
-                                        self.y_center)[0])
+                    
+                    obtained_pref = self.lut[i][j][k]
                     rand_cut = [self.x_center, self.y_center, self.rng.random()*2*np.pi]
-                    random_pref = np.array(pizza_calculations().ratio_calculator(
-                                        pizzas[pizza_id], 
-                                        rand_cut,
-                                        self.num_toppings, 
-                                        self.multiplier, 
-                                        self.x_center, 
-                                        self.y_center)[0])
                     required_pref = np.array(customer_amounts)
                     uniform_pref = np.ones((2, self.num_toppings))*(12/self.num_toppings)
 
@@ -264,3 +206,41 @@ class Player:
                         best_cut = cut
 
         return remaining_pizza_ids[0], [best_cut[0], best_cut[1]], best_cut[2]
+
+    '''
+    def _build_lut(self):
+        delta = 6 / N
+        theta = (2 * np.pi) / N
+
+        for t in (3, 4):
+            pizza = self._toppings_3([])[0] if t == 3 else self._toppings_4([])[0]
+
+            lut = np.zeros((N, N, N, 2, t))
+            for i in range(N):
+                d = delta * i
+                for j in range(N):
+                    angle = theta * j
+                    x = d * np.cos(angle)
+                    y = d * np.sin(angle)
+
+                    for k in range(N):
+                        rotation = (np.pi * k) / (2 * N)
+                        cut = [x, y, rotation]
+
+                        x_mod = (self.x_center + x * self.multiplier)
+                        y_mod = (self.y_center - y * self.multiplier)
+                        cut_mod = [x_mod, y_mod, rotation]
+
+                        obtained_pref = np.array(pizza_calculations().ratio_calculator(
+                                            pizza, 
+                                            cut_mod, 
+                                            t, 
+                                            self.multiplier, 
+                                            self.x_center, 
+                                            self.y_center)[0])
+                        lut[i][j][k] = obtained_pref
+                        print(i, j, k)
+                        print(obtained_pref)
+            np.save(f'lut{t}.npy', lut)
+            print(f'{t} done')
+    '''
