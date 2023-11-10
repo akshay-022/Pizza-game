@@ -14,6 +14,7 @@ class Player:
         self.y = 10*self.multiplier	# Center Point y of pizza
         self.calculator = pizza_calculations()
         self.counter = 0
+        self.anglecounter = 0
 
     def customer_gen(self, num_cust, rng = None):
         
@@ -27,28 +28,33 @@ class Player:
             preferences_total(list) : List of size [num_cust, 2, num_toppings], having all generated customer preferences
         """
         
-        mean = 0.8
-        std_dev = 2.0
-        
-        preferences_total = []
-        if rng==None:
-            np.random.seed(self.rng)
-            for i in range(num_cust):
-                preferences_1 = np.random.normal(mean, std_dev, self.num_toppings)
-                print(f'preferences 1 self.rng {preferences_1}')
-                preferences_1 = np.clip(preferences_1, 0, None)  # Ensure preferences are non-negative
-                preferences_1 /= preferences_1.sum()  # Normalize the preferences
-                preferences_total.append([preferences_1.tolist(), preferences_1.tolist()])  # Duplicate preferences
-        else :
-            np.random.seed(rng)
-            for i in range(num_cust):
-                preferences_1 = np.random.normal(mean, std_dev, self.num_toppings)
-                print(f'preferences 1 rng {preferences_1}')
-                preferences_1 = np.clip(preferences_1, 0, None)  # Ensure preferences are non-negative
-                preferences_1 /= preferences_1.sum()  # Normalize the preferences
-                preferences_total.append([preferences_1.tolist(), preferences_1.tolist()])  # Duplicate preferences
+        alpha = 6.0 
+        beta = 2.0  
 
-        print(f'preferences total {preferences_total}')
+        preferences_total = []
+        if rng == None:
+            np.random.seed(self.rng)
+            print("beta distribution")
+            for i in range(num_cust):
+                preferences_1 = np.random.beta(alpha, beta, self.num_toppings)
+                print(preferences_1)
+                preferences_1 = np.clip(preferences_1, 0, None)
+                preferences_1 /= preferences_1.sum() 
+                preferences_total.append(
+                    [preferences_1.tolist(), preferences_1.tolist()]) 
+        else:
+            for i in range(num_cust):
+                preferences_1 = rng.random((self.num_toppings,))
+                preferences_1 = 12 * preferences_1 / np.sum(preferences_1)
+                preferences_2 = rng.random((self.num_toppings,))
+                preferences_2 = 12 * preferences_2 / np.sum(preferences_2)
+                preferences = [preferences_1, preferences_2]
+                equal_prob = rng.random()
+                if equal_prob <= 0.0:
+                    preferences = (np.ones((2, self.num_toppings))
+                                   * 12 / self.num_toppings).tolist()
+                preferences_total.append(preferences)
+
         return preferences_total
 
     #def choose_discard(self, cards: list[str], constraints: list[str]):
@@ -80,11 +86,11 @@ class Player:
                 elif self.num_toppings == 3:
                     if i < 16:  # Toppings 1 and 2
                         angle = 2 * np.pi * i / 16
-                        x = inner_circle_radius * np.cos(angle)
-                        y = inner_circle_radius * np.sin(angle)
+                        x = 2 * np.cos(angle)
+                        y = 2 * np.sin(angle)
                         topping_type = 1 if i < 8 else 2
                     else:  # Topping 3
-                        angle = 2 * np.pi * (i - 8) / 16 + np.pi/8
+                        angle = 2 * np.pi * (i - 8) / 28 + np.pi/6
                         x = outer_circle_radius * np.cos(angle)
                         y = outer_circle_radius * np.sin(angle)
                         topping_type = 3
@@ -92,8 +98,8 @@ class Player:
                 elif self.num_toppings == 4:
                     if i < 12:  # Toppings 1 and 2
                         angle = 2 * np.pi * i / 12
-                        x = inner_circle_radius * np.cos(angle)
-                        y = inner_circle_radius * np.sin(angle)
+                        x = 2 * np.cos(angle)
+                        y = 2 * np.sin(angle)
                         topping_type = 1 if y > 0 else 2
                     else:  # Toppings 3 and 4
                         angle = 2 * np.pi * (i - 6) / 24
@@ -144,24 +150,36 @@ class Player:
             Tuple[int, center, first cut angle]: Return the pizza id you choose, the center of the cut in format [x_coord, y_coord] where both are in inches relative of pizza center of radius 6, the angle of the first cut in radians. 
         """
         final_id = remaining_pizza_ids[0]
-        final_center = [-3,-3]
-        final_angle = 360
-        max_score = 0
-        angles = [final_angle]
-        for id in remaining_pizza_ids:
-            test_center = [0,0]
-            test_angle = np.pi/8
-            
-            for i in range(0,100):
-                test_angle = i
+        final_center = [0,0]
+        final_angle = 0
+        max_score = self.get_score([pizzas[final_id]], [0], [customer_amounts], [[self.x + final_center[0]*self.multiplier, self.y - final_center[1]*self.multiplier, final_angle]])
+
+        test_angle = 0
+        while test_angle <= 3.14:
+            cut = [self.x + final_center[0]*self.multiplier, self.y - final_center[1]*self.multiplier, test_angle]
+            score = self.get_score([pizzas[final_id]], [0], [customer_amounts], [cut])
+
+            if score > max_score:
+                final_center = final_center
+                final_angle = test_angle
+            test_angle += .01
+        
+        radius = 5.5
+        for i in range(24):
+            angle = 2 * np.pi * i / 24
+            x = radius * np.cos(angle)
+            y = radius * np.sin(angle)
+            test_center = [x,y]
+            test_angle = 0
+            while test_angle <= 3.14:
                 cut = [self.x + test_center[0]*self.multiplier, self.y - test_center[1]*self.multiplier, test_angle]
-                score = self.get_score([pizzas[id]], [0], [customer_amounts], [cut])
+                score = self.get_score([pizzas[final_id]], [0], [customer_amounts], [cut])
 
                 if score > max_score:
-                    final_id = id
                     final_center = test_center
                     final_angle = test_angle
-        
+                test_angle += .04
+            
         return final_id, final_center, final_angle
 
     def get_score(self, pizzas, ids, preferences, cuts):

@@ -13,6 +13,7 @@ from players.team_4 import Player as p4
 from players.team_5 import Player as p5
 from players.team_6 import Player as p6
 import pickle as pkl
+import time
 
 class no_gui():
 
@@ -45,11 +46,13 @@ class no_gui():
         self.pizza_choice_order = []
         self.calculator = pizza_calculations()
         self.preferences_100 = None
+        self.execution_times = []
 
         #replace with arguments
         #self.autoplayer_number = args.autoplayer_number
         self.generator_number = int(args.generator_number)
         self.multiplier = int(args.interface_size) #(default 40)
+        self.run_number = int(args.gen_100_seed)
         self.rng_generator_100 = np.random.default_rng(int(args.gen_100_seed))
         self.rng_generator_10 = np.random.default_rng(int(args.gen_10_seed))
         self.player_nogui = int(args.player)
@@ -99,7 +102,7 @@ class no_gui():
             B_total = 0
             C_total = 0
             S_total = 0
-            results_run = [self.pizzas]
+            results_run = [{"player" :self.player_nogui, "generator" :self.generator_number, "num_toppings" : self.num_toppings_nogui, "run": self.run_number},self.pizzas]
             for i in range(len(self.pizzas)):
                 pizza_id = self.pizza_choice_order[i]
                 f.write('\n')
@@ -166,7 +169,7 @@ class no_gui():
             print("Total center offsets : " + str(np.sum(center_offsets)))
             f.write('\n')
             f.write('\n')
-            results_run.append({"U":U_total, "B":B_total, "C":C_total, "S":S_total, "SliceMetric": np.sum(slice_amount_metrics), "CenterOffset" : np.sum(center_offsets)})
+            results_run.append({"U":U_total, "B":B_total, "C":C_total, "S":S_total, "SliceMetric": np.sum(slice_amount_metrics), "CenterOffset" : np.sum(center_offsets), "ExecutionTime" : self.execution_times})
             if self.is_tournament:
                 with open("tournament_results.pkl", "rb") as fp:
                     a = pkl.load(fp)
@@ -184,7 +187,10 @@ class no_gui():
         self.preferences_100 = self.all_player_instances[self.generator_number].customer_gen(100, self.rng_generator_100)
         # print("Generated preferences are:", self.preferences)
         self.initialise_player(self.num_player, self.num_player)
+        start_time = time.time()
         self.pizzas = self.player_instance.choose_toppings(self.preferences_100)
+        end_time = time.time()
+        self.execution_times.append(end_time - start_time)
         self.pizzas_drawn = constants.number_of_initial_pizzas
         clash_exists_overall = False
         for i in range(constants.number_of_initial_pizzas):
@@ -202,7 +208,10 @@ class no_gui():
                 for i in range(len(self.cuts)):
                     if list(self.cuts[i]) == [0,0,0]:
                         options_pizza.append(i)
+                start_time = time.time()
                 pizza_id, center, theta = self.player_instance.choose_and_cut(self.pizzas, options_pizza, self.preferences[j])
+                end_time = time.time()
+                self.execution_times.append(end_time - start_time)
                 self.pizza_choice_order.append(pizza_id)
                 self.pizza_id = pizza_id
                 self.cuts[pizza_id][0] = (self.x + center[0]*self.multiplier)
