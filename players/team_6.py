@@ -1,6 +1,8 @@
 # Mathematical and Geometric Calculations
 import math  # For mathematical operations like trigonometric functions
 import numpy as np  # For numerical operations, array manipulations
+import pandas as pd
+import json
 
 # Additional Utilities
 from collections import defaultdict  # For easier handling of data structures
@@ -8,6 +10,7 @@ from typing import List, Tuple, Dict  # For type annotations.
 from tokenize import String
 import constants
 from utils import pizza_calculations
+from ast import literal_eval
 from shapely.geometry import LineString, Point
 import copy
 
@@ -184,51 +187,50 @@ class Player:
         else:
             return self.choose_four()
 
+    def precompute_preferences(self, pizzas, num_toppings, multiplier, pizza_center):
+        data = []
+        xCenter, yCenter = pizza_center
+        file_name = f'{num_toppings}.csv'
+
+        for pizza_id, pizza in enumerate(pizzas):
+            for radius in range(0, 6):
+                for x in np.linspace(-radius, radius, 24):
+                    for ySign in range(-1, 2, 2):
+                        y = ySign * (math.sqrt((radius ** 2) - (x ** 2)))
+                        for angle in np.arange(0, 2 * np.pi, np.radians(5)):
+                            xCord = (xCenter + x * multiplier)
+                            yCord = (yCenter - y * multiplier)
+                            obtained_pref, _ = self.calculations.ratio_calculator(pizza, [xCord, yCord, angle],
+                                                                                  num_toppings, multiplier,
+                                                                                  xCenter, yCenter)
+                            obtained_pref_str = json.dumps(obtained_pref.tolist())  # Convert numpy array to string
+                            data.append([pizza_id, x, y, angle, obtained_pref_str])
+
+        df = pd.DataFrame(data, columns=['pizza_id', 'x', 'y', 'angle', 'obtained_pref'])
+        df.to_csv(file_name, index=False)
+
+
     def choose_and_cut(self, pizzas, remaining_pizza_ids, customer_amounts):
+        #self.precompute_preferences(pizzas, self.num_toppings, self.multiplier, self.pizza_center)
+        file_name = f'{self.num_toppings}.csv'
+        df = pd.read_csv(file_name)
         maximumS = -1000
-        maximumCut = [self.pizza_center[0], self.pizza_center[1],
-                      np.pi / 6, remaining_pizza_ids[0]]  # default cut
-        xCenter = self.pizza_center[0]
-        yCenter = self.pizza_center[1]
-        multiplier = self.multiplier
+        maximumCut = None
 
-        pizza = pizzas[remaining_pizza_ids[0]]
-        pizza_id = remaining_pizza_ids[0]
-        for radius in range(0, 6):
-            # Increase the steps to 24 in every direction for the radius
-            for x in np.linspace(-radius, radius, 24):
-                for ySign in range(-1, 2, 2):
-                    y = ySign * (math.sqrt((radius**2) - (x**2)))
-                    # Consider every 5 degree angle
-                    for angle in np.arange(0, 2 * np.pi, np.radians(5)):
-                        cut = [x, y, angle, pizza_id]
+        for pizza_id in remaining_pizza_ids:
+            pizza_df = df[df['pizza_id'] == pizza_id]
+            for index, row in pizza_df.iterrows():
+                obtained_pref_str = row['obtained_pref']
+                obtained_pref = np.array(json.loads(obtained_pref_str))
+                required_pref = np.array(customer_amounts)
+                uniform_pref = np.ones((2, self.num_toppings)) * (12 / self.num_toppings)
+                b = np.round(np.absolute(required_pref - uniform_pref), 3)
+                c = np.round(np.absolute(obtained_pref - required_pref), 3)
+                s = (b - c).sum()
+                if s > maximumS:
+                    maximumS = s
+                    maximumCut = [row['x'], row['y'], row['angle'], pizza_id]
 
-                        xCord = (xCenter + x * multiplier)
-                        yCord = (yCenter - y * multiplier)
-                        obtained_pref, slice_areas_toppings = self.calculations.ratio_calculator(pizza,
-                                                                                                 [xCord, yCord, angle],
-                                                                                                 self.num_toppings, multiplier,
-                                                                                                 xCenter, yCenter)
-                        obtained_pref = np.array(obtained_pref)
-                        random_pref, temp = self.calculations.ratio_calculator(pizza, [xCenter, yCenter,
-                                                                                       self.rng.random() * 2 * np.pi],
-                                                                               self.num_toppings, multiplier, xCenter, yCenter)
-                        random_pref = np.array(random_pref)
-                        required_pref = np.array(customer_amounts)
-                        uniform_pref = np.ones(
-                            (2, self.num_toppings)) * (12 / self.num_toppings)
-                        b = np.round(np.absolute(
-                            required_pref - uniform_pref), 3)
-                        c = np.round(np.absolute(
-                            obtained_pref - required_pref), 3)
-                        u = np.round(np.absolute(
-                            random_pref - uniform_pref), 3)
-                        s = (b - c).sum()
-                        if s > maximumS:
-                            maximumS = s
-                            maximumCut = cut
-        x = maximumCut[0]
-        y = maximumCut[1]
-        theta = maximumCut[2]
-        pizza_id = maximumCut[3]
+        x, y, theta, pizza_id = maximumCut
+        #print(f"Chosen cut: x={x}, y={y}, theta={theta}, pizza_id={pizza_id}")
         return pizza_id, [x, y], theta
