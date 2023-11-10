@@ -44,14 +44,23 @@ class Player:
             covariance_matrix = np.eye(self.num_toppings)
 
             for i in range(num_cust):
-                preferences = self.rng.multivariate_normal(mean_vector, covariance_matrix)
-
+                # customer 1
+                preferences1 = self.rng.multivariate_normal(mean_vector, covariance_matrix)
                 # clip to ensure non-negative values
-                preferences = np.clip(preferences, 0, None)
-                # normalize
-                preferences /= preferences.sum()
+                preferences1 = np.clip(preferences1, 0, 1)
+                # Add a small constant to avoid null arrays after clipping
+                preferences1 += 1e-10
+                # scale to sum to 12
+                preferences1 *= 12 / np.sum(preferences1)
 
-                preferences_total.append(preferences.tolist())
+                # customer 2
+                preferences2 = self.rng.multivariate_normal(mean_vector, covariance_matrix)
+                preferences2 = np.clip(preferences2, 0, 1)
+                preferences2 += 1e-10
+                preferences2 *= 12 / np.sum(preferences2)
+
+                preferences = [preferences1, preferences2]
+                preferences_total.append(preferences)
 
         else:
             # standard norm distribution has mean 0 and variance 1
@@ -60,14 +69,27 @@ class Player:
             covariance_matrix = np.eye(self.num_toppings)
 
             for i in range(num_cust):
-                preferences = rng.multivariate_normal(mean_vector, covariance_matrix)
-
+                # customer 1
+                preferences1 = rng.multivariate_normal(mean_vector, covariance_matrix)
                 # clip to ensure non-negative values
-                preferences = np.clip(preferences, 0, None)
-                # normalize
-                preferences /= preferences.sum()
+                preferences1 = np.clip(preferences1, 0, 1)
+                # Add a small constant to avoid null arrays after clipping
+                preferences1 += 1e-10
+                # scale to sum to 12
+                preferences1 *= 12 / np.sum(preferences1)
 
-                preferences_total.append(preferences.tolist())
+                # customer 2
+                preferences2 = rng.multivariate_normal(mean_vector, covariance_matrix)
+                preferences2 = np.clip(preferences2, 0, 1)
+                preferences2 += 1e-10
+                preferences2 *= 12 / np.sum(preferences2)
+
+                preferences = [preferences1, preferences2]
+
+                # print(f'PREFERENCES: {preferences}')
+                # print(f'PREFERENCES SUM: {np.sum(preferences)}')  # should sum to 24
+
+                preferences_total.append(preferences)
 
         return preferences_total
     def circle_topping_2(self, preferences):
@@ -689,10 +711,11 @@ class Player:
             # return pizzas
 
             # 2 circles of each type (6) + 2 lines + 2 radial lines
-            pizzas = [self.circle_topping_3_v1(preferences)] * 2 + [self.circle_topping_3_v2(preferences)] * 2 + [self.circle_topping_3_v3(preferences)] * 2 + [self.lines_topping_3(preferences)] * 2 + [self.radio_topping_3(preferences)] * 2
+            # pizzas = [self.circle_topping_3_v1(preferences)] * 2 + [self.circle_topping_3_v2(preferences)] * 2 + [self.circle_topping_3_v3(preferences)] * 2 + [self.lines_topping_3(preferences)] * 2 + [self.radio_topping_3(preferences)] * 2
 
-            return pizzas
+            # return pizzas
 
+            return [self.circle_topping_3_v1(preferences)] * 10
 
         elif self.num_toppings == 4:
 
