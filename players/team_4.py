@@ -108,6 +108,37 @@ class Player:
         pizzas = np.zeros((10, 24, 3))
         for j in range(constants.number_of_initial_pizzas):
                 pizza_indiv = np.zeros((24,3))
+                for i in range(12):
+                    angle = (i * np.pi / 6) + np.pi / 12
+                    dist = 1.5
+                    x = dist * np.cos(angle)
+                    y = dist * np.sin(angle)
+                    pizza_indiv[i] = [x, y, (i/6) + 1]
+                for i in range(6):
+                    angle = (i * np.pi / 3) + np.pi / 6
+                    dist = 2.5
+                    x = dist * np.cos(angle)
+                    y = dist * np.sin(angle)
+                    pizza_indiv[12 + i] = [x, y, 3]
+
+                dist = 3.5
+                angle = np.pi / 8
+
+                pizza_indiv[18] = [dist, 0, 4]
+
+                pizza_indiv[19] = [0, dist, 4]
+
+                pizza_indiv[20] = [dist * np.cos(np.pi - angle), dist * np.sin(np.pi - angle), 4]
+                pizza_indiv[21] = [dist * np.cos(np.pi + angle), dist * np.sin(np.pi + angle), 4]
+
+                pizza_indiv[22] = [dist * np.cos(3 * np.pi / 2 - angle), dist * np.sin(3 * np.pi / 2 - angle), 4]
+                pizza_indiv[23] = [dist * np.cos(3 * np.pi / 2 + angle), dist * np.sin(3 * np.pi / 2 + angle), 4]
+                pizza_indiv = np.array(pizza_indiv)
+                pizzas[j] = pizza_indiv
+        """
+        pizzas = np.zeros((10, 24, 3))
+        for j in range(constants.number_of_initial_pizzas):
+                pizza_indiv = np.zeros((24,3))
                 for i in range(self.num_toppings):
                     center_d = 2.
                     theta_d = i * np.pi / 2
@@ -120,6 +151,7 @@ class Player:
                         pizza_indiv[6 * i + k] = [x, y, i+1]
                 pizza_indiv = np.array(pizza_indiv)
                 pizzas[j] = pizza_indiv
+        """
 
         return list(pizzas)
         
@@ -191,7 +223,13 @@ class Player:
                     x_mod = (self.x_center + x * self.multiplier)
                     y_mod = (self.y_center - y * self.multiplier)
                     cut_mod = [x_mod, y_mod, rotation]
-                    
+                    #obtained_pref = np.array(pizza_calculations().ratio_calculator(
+                    #                pizzas[pizza_id], 
+                    #                cut_mod, 
+                    #                self.num_toppings, 
+                    #                self.multiplier, 
+                    #                self.x_center, 
+                    #                self.y_center)[0])
                     obtained_pref = self.lut[i][j][k]
                     rand_cut = [self.x_center, self.y_center, self.rng.random()*2*np.pi]
                     required_pref = np.array(customer_amounts)
