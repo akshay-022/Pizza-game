@@ -14,6 +14,7 @@ class Player:
         self.y = 10*self.multiplier	# Center Point y of pizza
         self.calculator = pizza_calculations()
         self.counter = 0
+        self.anglecounter = 0
 
     def customer_gen(self, num_cust, rng = None):
         
@@ -85,11 +86,11 @@ class Player:
                 elif self.num_toppings == 3:
                     if i < 16:  # Toppings 1 and 2
                         angle = 2 * np.pi * i / 16
-                        x = inner_circle_radius * np.cos(angle)
-                        y = inner_circle_radius * np.sin(angle)
+                        x = 2 * np.cos(angle)
+                        y = 2 * np.sin(angle)
                         topping_type = 1 if i < 8 else 2
                     else:  # Topping 3
-                        angle = 2 * np.pi * (i - 8) / 16 + np.pi/8
+                        angle = 2 * np.pi * (i - 8) / 28 + np.pi/6
                         x = outer_circle_radius * np.cos(angle)
                         y = outer_circle_radius * np.sin(angle)
                         topping_type = 3
@@ -97,8 +98,8 @@ class Player:
                 elif self.num_toppings == 4:
                     if i < 12:  # Toppings 1 and 2
                         angle = 2 * np.pi * i / 12
-                        x = inner_circle_radius * np.cos(angle)
-                        y = inner_circle_radius * np.sin(angle)
+                        x = 2 * np.cos(angle)
+                        y = 2 * np.sin(angle)
                         topping_type = 1 if y > 0 else 2
                     else:  # Toppings 3 and 4
                         angle = 2 * np.pi * (i - 6) / 24
@@ -149,24 +150,36 @@ class Player:
             Tuple[int, center, first cut angle]: Return the pizza id you choose, the center of the cut in format [x_coord, y_coord] where both are in inches relative of pizza center of radius 6, the angle of the first cut in radians. 
         """
         final_id = remaining_pizza_ids[0]
-        final_center = [-3,-3]
-        final_angle = 360
-        max_score = 0
-        angles = [final_angle]
-        for id in remaining_pizza_ids:
-            test_center = [0,0]
-            test_angle = np.pi/8
-            
-            for i in range(0,100):
-                test_angle = i
+        final_center = [0,0]
+        final_angle = 0
+        max_score = self.get_score([pizzas[final_id]], [0], [customer_amounts], [[self.x + final_center[0]*self.multiplier, self.y - final_center[1]*self.multiplier, final_angle]])
+
+        test_angle = 0
+        while test_angle <= 3.14:
+            cut = [self.x + final_center[0]*self.multiplier, self.y - final_center[1]*self.multiplier, test_angle]
+            score = self.get_score([pizzas[final_id]], [0], [customer_amounts], [cut])
+
+            if score > max_score:
+                final_center = final_center
+                final_angle = test_angle
+            test_angle += .01
+        
+        radius = 5.5
+        for i in range(24):
+            angle = 2 * np.pi * i / 24
+            x = radius * np.cos(angle)
+            y = radius * np.sin(angle)
+            test_center = [x,y]
+            test_angle = 0
+            while test_angle <= 3.14:
                 cut = [self.x + test_center[0]*self.multiplier, self.y - test_center[1]*self.multiplier, test_angle]
-                score = self.get_score([pizzas[id]], [0], [customer_amounts], [cut])
+                score = self.get_score([pizzas[final_id]], [0], [customer_amounts], [cut])
 
                 if score > max_score:
-                    final_id = id
                     final_center = test_center
                     final_angle = test_angle
-        
+                test_angle += .04
+            
         return final_id, final_center, final_angle
 
     def get_score(self, pizzas, ids, preferences, cuts):
