@@ -139,290 +139,176 @@ class Player:
             return sum_
 
     def choose_toppings(self, preferences):
-        """Function in which we choose position of toppings
+            """Function in which we choose position of toppings
 
-        Args:
-            num_toppings(int) : the total number of different topics chosen among 2, 3 and 4
-            preferences(list) : List of size 100*2*num_toppings for 100 generated preference pairs(actual amounts) of customers.
+            Args:
+                num_toppings(int) : the total number of different topics chosen among 2, 3 and 4
+                preferences(list) : List of size 100*2*num_toppings for 100 generated preference pairs(actual amounts) of customers.
 
-        Returns:
-            pizzas(list) : List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping center, y coordinate of topping center, topping number of topping(1/2/3/4) (Note that it starts from 1, not 0)]
-        """
-        #uniform = 0
-        self.avg_by_ten(preferences)
-        #print("PREF:", preferences)
+            Returns:
+                pizzas(list) : List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping center, y coordinate of topping center, topping number of topping(1/2/3/4) (Note that it starts from 1, not 0)]
+            """
+            #uniform = 0
+            self.avg_by_ten(preferences)
+            #print("PREF:", preferences)
 
-        count=0
-        three_topping_tracker = 0
-        four_topping_tracker = 0
-        # for pair in preferences:
-        #     for array in pair:
-        #         self.uniform_ = self.isUniform(array)
-        #         #print("Is it uniform", self.uniform_, self.isUniform(array))
-        #         count+=1
-        #         #print("this is the array we are dealing with", array, " #", count)
-        #         if self.uniform_==1:
-        #             break
-        #         else:
-        #            #print("TOP 1", array[0], 12/len(array))
-        #             if array[0] > 12/len(array):     
-        #                 self.topping_1+=1
-        #             if array[1] > 12/len(array):
-        #                 self.topping_2+=1
-        #             if len(array) > 2:
-        #                 if array[2] > 12/len(array):
-        #                     self.topping_3+=1
-        #                 if len(array) > 3:
-        #                     if array[3] > 12/len(array):
-        #                         self.topping_4+=1
-
-        
-                
-
-        #print("these are the topping stats", self.uniform_, self.topping_1, self.topping_2, self.topping_3, self.topping_4)
-        
-        x_coords = [np.sin(np.pi/2)]
-        pizzas = np.zeros((10, 24, 3))
-        type_of_topping = 0
-        avg_list = []
-        #print("this is the num of initial", constants.number_of_initial_pizzas)
-        #print("these are the preferences", preferences)
-        for j in range(constants.number_of_initial_pizzas):
-            if len(preferences)==100:
-                avg_list=self.avg_by_ten(preferences[(j*10):])
-            else:
-                avg_list = preferences[j]
-
-            pizza_indiv = np.zeros((24,3))
-            i = 0
-            first_dist = 0
-            while i<24:
-                
-                if self.num_toppings == 2:
-                    first_dist = 3
-                elif self.num_toppings == 3:
-                    first_dist = 3
+            count=0
+            three_topping_tracker = 0
+            four_topping_tracker = 0
+    
+            x_coords = [np.sin(np.pi/2)]
+            pizzas = np.zeros((10, 24, 3))
+            type_of_topping = 0
+            avg_list = []
+            #print("this is the num of initial", constants.number_of_initial_pizzas)
+            #print("these are the preferences", preferences)
+            for j in range(constants.number_of_initial_pizzas):
+                if len(preferences)==100:
+                    avg_list=self.avg_by_ten(preferences[(j*10):])
                 else:
-                    first_dist = 3 
-                #print("This is the distance: ", dist)
-                
-                angle = i/24*2*np.pi
-               # print("This is the angle: ", angle)
+                    avg_list = preferences[j]
 
-
-                if self.num_toppings == 2: 
-                    x = first_dist*np.cos(angle)
-                    y = first_dist*np.sin(angle)
+                pizza_indiv = np.zeros((24,3))
+                i = 0
+                first_dist = 0
+                second_dist = 0
+                while i<24:
                     
-                    #print("this is x and y", x , y)
-                    if angle < np.pi:
-                        type_of_topping = 1
+                    if self.num_toppings == 2:
+                        first_dist = 3
+                    elif self.num_toppings == 3:
+                        first_dist = 3
+                        second_dist = 4.5
                     else:
-                        type_of_topping = 2
-                
-                if self.num_toppings == 3:
-                    x = first_dist*np.cos(angle)
-                    y = first_dist*np.sin(angle)
+                        first_dist = 3 
+                    #print("This is the distance: ", dist)
                     
-                    #print("this is x and y", x , y)
-                    if angle < (2/3*(np.pi)):
-                        type_of_topping = 1
-                    elif angle >= (2/3*(np.pi)) and angle < (4/3*(np.pi)):
-                        type_of_topping = 2
-                    else: 
-                        type_of_topping = 3
+                    angle = i/24*2*np.pi
+                # print("This is the angle: ", angle)
 
 
-                if self.num_toppings == 4:
-                    x = first_dist*np.cos(angle)
-                    y = first_dist*np.sin(angle)
-                    #print("this is j: ", j)
-                
-
-                    
-
-                    #print("this is x and y", x , y)
-                    if angle < (2/4*(np.pi)):
-                        index_ = avg_list.index(self.largest_num(avg_list))+1
-                        type_of_topping = index_
-                    elif angle >= (2/4*(np.pi)) and angle < ((np.pi)):
-                        if i == 6:
-                            remove_ = avg_list.index(self.largest_num(avg_list))
-                            avg_list[remove_] = -100
-                        index_ = avg_list.index(self.largest_num(avg_list))+1
-                        type_of_topping = index_
-                    elif angle >= ((np.pi)) and angle < (6/4*(np.pi)):
-                        if i == 12:
-                            remove_ = avg_list.index(self.largest_num(avg_list))
-                            avg_list[remove_] = -100                        
-                        index_ = avg_list.index(self.largest_num(avg_list))+1
-                        type_of_topping = index_
-                    else: 
-                        if i == 18:
-                            remove_ = avg_list.index(self.largest_num(avg_list))
-                            avg_list[remove_] = -100
-                        index_ = avg_list.index(self.largest_num(avg_list))+1
-                        type_of_topping = index_
-                    #look through the preferences and see which is the most popular, you can do it every 10 pizzas
-                    '''
-                    i = 0
-                    while i<10:
-                        do what im doing for the preferences and and build each pizza accordingly 
-                        if length is 10 then based on each pizza model toppings off that individual one
-
-                        sort out the placements 
-                        need to analyse both pairs see which person prefers what and possibly place based on most liked by both
-                        maybe keep in dictionary and if it runs out choose from remaining and brute force
+                    if self.num_toppings == 2: 
+                        x = first_dist*np.cos(angle)
+                        y = first_dist*np.sin(angle)
                         
-                    '''
-
-        
-
-
-                    # three_topping_tracker+=1
-                    # angle = i/16*2*np.pi
-                    # x = first_dist*np.cos(angle)
-                    # y = first_dist*np.sin(angle)
-                    # print("This is the x, y: ", x, y)
-
-                    # if angle < np.pi and three_topping_tracker<17:
-                    #     type_of_topping = 1
-                    #     print("Getting in: ", x, y)
-                    # elif angle >= np.pi and three_topping_tracker<17:
-                    #     type_of_topping = 2
-                    #     print("Making the circle ", x, y)
-                    # else:
-                    #     first_dist = 4.5
-                    #     angle = ((i%8)+1)/8*2*np.pi
-                    #     # if three_topping_tracker<21:
-                    #     print("three_topping_tracker: ", three_topping_tracker)
-                    #     x = first_dist*np.cos(angle)
-                    #     y = first_dist*np.sin(angle)
-                    #     type_of_topping = 3
-                    #     # else: 
-                        #     x = -first_dist*(((three_topping_tracker%4+1)/2)*np.pi)
-                        #     y = -(first_dist*(((three_topping_tracker%4+1)/2)*np.pi))
-
+                        #print("this is x and y", x , y)
+                        if angle < np.pi:
+                            type_of_topping = 1
+                        else:
+                            type_of_topping = 2
                     
-
-                clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
-                if not clash_exists:
-                    pizza_indiv[i] = [x, y, type_of_topping]
-                    i = i+1
-                pizza_indiv = np.array(pizza_indiv)
-                pizzas[j] = pizza_indiv
-        # print("These are the pizzas ", list(pizzas))
-        return list(pizzas)
-    '''
-    #def choose_discard(self, cards: list[str], constraints: list[str]):
-    def choose_toppings(self, preferences):
-        """Function in which we choose position of toppings
-
-        Args:
-            num_toppings(int) : the total number of different topics chosen among 2, 3 and 4
-            preferences(list) : List of size 100*2*num_toppings for 100 generated preference pairs(actual amounts) of customers.
-
-        Returns:
-            pizzas(list) : List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping center, y coordinate of topping center, topping number of topping(1/2/3/4) (Note that it starts from 1, not 0)]
-        """
-        
-        x_coords = [np.sin(np.pi/2)]
-        pizzas = np.zeros((10, 24, 3))
-        for j in range(constants.number_of_initial_pizzas):
-            pizza_indiv = np.zeros((24,3))
-            i = 0
-            while i<24:
-                angle = self.rng.random()*2*np.pi
-                dist = self.rng.random()*6
-                x = dist*np.cos(angle)
-                y = dist*np.sin(angle)
-                clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
-                if not clash_exists:
-                    pizza_indiv[i] = [x, y, i%self.num_toppings + 1]
-                    i = i+1
-            pizza_indiv = np.array(pizza_indiv)
-            pizzas[j] = pizza_indiv
-        return list(pizzas)
-    '''
+                    if self.num_toppings == 3:
+                        if i <= 15:
+                            angle = i/16*2*np.pi
+                            x = first_dist*np.cos(angle)
+                            y = first_dist*np.sin(angle)
+                            if angle < np.pi:
+                                index_ = avg_list.index(self.largest_num(avg_list))+1
+                                type_of_topping = index_
+                            else:
+                                if i == 8:
+                                    remove_ = avg_list.index(self.largest_num(avg_list))
+                                    avg_list[remove_] = -100
+                                index_ = avg_list.index(self.largest_num(avg_list))+1
+                                type_of_topping = index_                            
+                    # if i < 16:  # Toppings 1 and 2
+                    #         angle = 2 * np.pi * i / 16
+                    #         x = inner_circle_radius * np.cos(angle)
+                    #         y = inner_circle_radius * np.sin(angle)
+                    #         topping_type = 1 if i < 8 else 2
+                    #     else:  # Topping 3
+                    #         angle = 2 * np.pi * (i - 8) / 16 + np.pi/8
+                    #         x = outer_circle_radius * np.cos(angle)
+                    #         y = outer_circle_radius * np.sin(angle)
+                    #         topping_type = 3                    
+                    #     #print("this is x and y", x , y)
+                        else: 
+                            angle = 2 * np.pi * (i - 8) / 16
+                            x = second_dist*np.cos(angle)
+                            y = second_dist*np.sin(angle)
+                            if i == 16:
+                                remove_ = avg_list.index(self.largest_num(avg_list))
+                                avg_list[remove_] = -100
+                            index_ = avg_list.index(self.largest_num(avg_list))+1
+                            type_of_topping = index_
 
 
+                    if self.num_toppings == 4:
+                        x = first_dist*np.cos(angle)
+                        y = first_dist*np.sin(angle)
+                    
+                        if angle < (2/4*(np.pi)):
+                            index_ = avg_list.index(self.largest_num(avg_list))+1
+                            type_of_topping = index_
+                        elif angle >= (2/4*(np.pi)) and angle < ((np.pi)):
+                            if i == 6:
+                                remove_ = avg_list.index(self.largest_num(avg_list))
+                                avg_list[remove_] = -100
+                            index_ = avg_list.index(self.largest_num(avg_list))+1
+                            type_of_topping = index_
+                        elif angle >= ((np.pi)) and angle < (6/4*(np.pi)):
+                            if i == 12:
+                                remove_ = avg_list.index(self.largest_num(avg_list))
+                                avg_list[remove_] = -100                        
+                            index_ = avg_list.index(self.largest_num(avg_list))+1
+                            type_of_topping = index_
+                        else: 
+                            if i == 18:
+                                remove_ = avg_list.index(self.largest_num(avg_list))
+                                avg_list[remove_] = -100
+                            index_ = avg_list.index(self.largest_num(avg_list))+1
+                            type_of_topping = index_
+                        #look through the preferences and see which is the most popular, you can do it every 10 pizzas
+                        '''
+                        i = 0
+                        while i<10:
+                            do what im doing for the preferences and and build each pizza accordingly 
+                            if length is 10 then based on each pizza model toppings off that individual one
 
-    def choose_and_cut_v2(self, pizzas, remaining_pizza_ids, customer_amounts):
-        """Function which based n current game state returns the distance and angle, the shot must be played
-        Args:
-            pizzas (list): List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping, y coordinate of topping, topping number of topping(1/2/3/4)]
-            remaining_pizza_ids (list): A list of remaining pizza's ids
-            customer_amounts (list): The amounts in which the customer wants their pizza
-        Returns:
-            Tuple[int, center, first cut angle]: Return the pizza id you choose, the center of the cut in format [x_coord, y_coord] where both are in inches relative of pizza center of radius 6, the angle of the first cut in radians.
-        """
-        angle = 0
-        forty_five_deg = [2/math.sqrt(2),2/math.sqrt(2)]
-        position = []
-        print(customer_amounts)
-        if self.num_toppings == 2:
-            if customer_amounts[0][0] > customer_amounts[0][1]:
-                angle=(7/4)*np.pi
-                forty_five_deg[1] = -1*forty_five_deg[1]
-                position = [2*forty_five_deg[0], 2*forty_five_deg[1]]
-                print("this is the position", position)
-                return remaining_pizza_ids[0], position, angle
-            elif customer_amounts[0][0] < customer_amounts[0][1]:
-                angle=(3/4)*np.pi
-                forty_five_deg[0] = -1*forty_five_deg[0]
-                position = [2*forty_five_deg[0], 2*forty_five_deg[1]]
-                return remaining_pizza_ids[0], position, angle
-        elif self.num_toppings == 3:
-            max_ = self.largest_num(customer_amounts[0])
-            if customer_amounts[0][0] == max_:
-                angle=(5/4)*np.pi
-                forty_five_deg[0] = -1*forty_five_deg[0]
-                forty_five_deg[1] = -1*forty_five_deg[1]
-                position = [2*forty_five_deg[0], 2*forty_five_deg[1]]
-                print("this is the position", position)
-                return remaining_pizza_ids[0], position, angle
-            elif customer_amounts[0][1] == max_:
-                angle=(1/4)*np.pi
-                position = [2*forty_five_deg[0], 2*forty_five_deg[1]]
-                return remaining_pizza_ids[0], position, angle
-            elif customer_amounts[0][2] == max_:
-                angle=(5/6)*np.pi
-                forty_five_deg[0] = -1*(math.sqrt(3)/2)
-                forty_five_deg[1] = 1/2
-                position = [2*forty_five_deg[0], 2*forty_five_deg[1]]
-                return remaining_pizza_ids[0], position, angle
-        elif self.num_toppings == 4:
-            forty_five_deg_2= [(math.sqrt(3)/2), 1/2]
-            max_ = self.largest_num(customer_amounts[0])
-            if customer_amounts[0][0] == max_:
-                angle=(5/4)*np.pi
-                forty_five_deg[0] = -1*forty_five_deg[0]
-                forty_five_deg[1] = -1*forty_five_deg[1]
-                position = [2*forty_five_deg[0], 2*forty_five_deg[1]]
-                print("this is the position", position)
-                return remaining_pizza_ids[0], position, angle
-            elif customer_amounts[0][1] == max_:
-                angle=(11/6)*np.pi
-                forty_five_deg_2[1] = -1*forty_five_deg[1]
-                position = [2*forty_five_deg[0], 2*forty_five_deg[1]]
-                return remaining_pizza_ids[0], position, angle
-            elif customer_amounts[0][2] == max_:
-                angle=(1/4)*np.pi
-                position = [2*forty_five_deg[0], 2*forty_five_deg[1]]
-                return remaining_pizza_ids[0], position, angle
-            elif customer_amounts[0][3] == max_:
-                angle=(2/3)*np.pi
-                forty_five_deg_2[0] = -1*forty_five_deg[0]
-                position = [2*forty_five_deg[0], 2*forty_five_deg[1]]
-                return remaining_pizza_ids[0], position, angle
-        pizza_id = remaining_pizza_ids[0]
-        return  remaining_pizza_ids[0], [0,0], np.pi/8
-    def largest_num(self, array):
-        max_ = -1000
-        for i in array:
-            if i>max_:
-                max_ = i
-        return max_
+                            sort out the placements 
+                            need to analyse both pairs see which person prefers what and possibly place based on most liked by both
+                            maybe keep in dictionary and if it runs out choose from remaining and brute force
+                            
+                        '''
+
+            
+
+
+                        # three_topping_tracker+=1
+                        # angle = i/16*2*np.pi
+                        # x = first_dist*np.cos(angle)
+                        # y = first_dist*np.sin(angle)
+                        # print("This is the x, y: ", x, y)
+
+                        # if angle < np.pi and three_topping_tracker<17:
+                        #     type_of_topping = 1
+                        #     print("Getting in: ", x, y)
+                        # elif angle >= np.pi and three_topping_tracker<17:
+                        #     type_of_topping = 2
+                        #     print("Making the circle ", x, y)
+                        # else:
+                        #     first_dist = 4.5
+                        #     angle = ((i%8)+1)/8*2*np.pi
+                        #     # if three_topping_tracker<21:
+                        #     print("three_topping_tracker: ", three_topping_tracker)
+                        #     x = first_dist*np.cos(angle)
+                        #     y = first_dist*np.sin(angle)
+                        #     type_of_topping = 3
+                        #     # else: 
+                            #     x = -first_dist*(((three_topping_tracker%4+1)/2)*np.pi)
+                            #     y = -(first_dist*(((three_topping_tracker%4+1)/2)*np.pi))
+
+                        
+
+                    clash_exists = pizza_calculations.clash_exists(x, y, pizza_indiv, i)
+                    if not clash_exists:
+                        pizza_indiv[i] = [x, y, type_of_topping]
+                        i = i+1
+                    pizza_indiv = np.array(pizza_indiv)
+                    pizzas[j] = pizza_indiv
+            # print("These are the pizzas ", list(pizzas))
+            return list(pizzas)
+
 
    #def play(self, cards: list[str], constraints: list[str], state: list[str], territory: list[int]) -> Tuple[int, str]:
     def choose_and_cut(self, pizzas, remaining_pizza_ids, customer_amounts):
@@ -443,79 +329,67 @@ class Player:
         customer_2_preference = customer_amounts[1]
 
         pizza_id = remaining_pizza_ids[0]
-        listOfCenters = self.generate_values()
+        listOfCenters, listOfAngles  = self.generate_values()
 
         max_s = -10000
         best_center = None
         best_angle = None
-        b = c = s = u = None
+
     
         for _center in listOfCenters:
-            center = [self.x + _center[0], self.y + _center[1]]
-        
-            cuts = []
-            for i in np.linspace(0, 1, 11):
-                angle = i * 45*np.pi/180
-                x, y = self.calculate_cut_intersection(6, angle, center)
+            for angles in listOfAngles:
+                cut = [self.x + _center[0]*self.multiplier, self.y - _center[1]*self.multiplier, angles]
+                score = self.get_score([pizzas[pizza_id]], [0], [customer_amounts], [cut])
 
-                #print("random run")
-                random_pref, temp = self.calculator.ratio_calculator(pizzas[pizza_id], [x, y, self.rng.random()*2*np.pi], num_toppings, self.multiplier, self.x, self.y)
-                #print("our run")
-                obtained_pref, slice_areas_toppings = self.calculator.ratio_calculator(pizzas[pizza_id], [center[0], center[1], angle], num_toppings, self.multiplier, self.x, self.y)
-                obtained_pref = np.array(obtained_pref)
-                slice_areas = self.calculator.slice_area_calculator([center[0], center[1], angle], self.multiplier, self.x, self.y)
-                # Try to fix if theta is 0
-                random_pref = np.array(random_pref)
-                required_pref = np.array(customer_amounts)
-                uniform_pref = np.ones((2, num_toppings))*(12/num_toppings)
-                #print('random_pref', random_pref)
-                #print('required_pref', required_pref)
-                #print('uniform_pref', uniform_pref)
-                b = np.round(np.absolute(required_pref - uniform_pref), 3)
-                c = np.round(np.absolute(obtained_pref - required_pref), 3)
-                s = b - c
-                u = np.round(np.absolute(random_pref - uniform_pref), 3)
-                #print("b:", b)
-                #print("c:", c)
-                #print("u:", u)
-                s = np.sum([np.sum(s[0]), np.sum(s[1])])
-                #print("s:", s)
-                cuts.append((angle, s))
-                
 
-            for inst in cuts:
-                if inst[-1] > max_s:
-                    max_s = inst[-1]
-                    best_center = _center
-                    best_angle = max(cuts, key=lambda x: x[-1])[0]
-
+                if score > max_s:
+                    max_s = score
+                    best_angle = angles
+                    best_center = _center 
 
         # Print the coordinates of the intersections.
-        print("The set of cuts for this pizza", cuts)
-        print("Best Center" , best_center)
-        print("Best_angle", best_angle)
-        print("b:", b)
-        print("c:", c)
-        print("u:", u)
-        print("s:", s)
-        print("max_s:", max_s)
+        #print("s:", score)
+        #print("Best Center" , best_center)
+        #print("Best_angle", best_angle)
+        #print("max_s:", max_s)
 
         return pizza_id, best_center, best_angle
 
     def generate_values(self):
         # Creates a set of coordinates for radius values 1 through 3
-        result = []
-        for R in range(1, 4):
-            result.append([R, 0])
-            result.append([R / 2, -R / 2])
-            result.append([0, -R])
-            result.append([-R / 2, -R / 2])
-            result.append([-R, 0])
-            result.append([-R / 2, R / 2])
-            result.append([0, R])
-            result.append([R / 2, R / 2])
-        return result
+        centers = []
+        angles = []
+        for i in range(1, 100):
+            angles.append(i*np.pi/180)
+        for R in range(1, 3):
+            centers.append([R, 0])
+            centers.append([R / 2, -R / 2])
+            centers.append([0, -R])
+            centers.append([-R / 2, -R / 2])
+            centers.append([-R, 0])
+            centers.append([-R / 2, R / 2])
+            centers.append([0, R])
+            centers.append([R / 2, R / 2])
+        return centers, angles
     
+    def get_score(self, pizzas, ids, preferences, cuts):
+        B, C, U, obtained_preferences, center_offsets, slice_amount_metric = self.calculator.final_score(pizzas, ids, preferences, cuts, self.num_toppings, self.multiplier, self.x, self.y)
+        usum = self.sum(U[0])
+        bsum = self.sum(B[0])
+        csum = self.sum(C[0])
+
+
+        #print("B:", bsum)
+        #print("C:", csum)
+        return bsum - csum
+
+    def sum(self, array):
+        sum = 0
+        for a in array:
+            for b in a:
+                sum += b
+        return sum
+
     def calculate_cut_intersection(self, pizza_radius, angle, center):
         """Calculates the coordinate of the cut intersection.
 
