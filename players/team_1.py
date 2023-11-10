@@ -18,6 +18,10 @@ class Player:
         self.xCenter = 12*self.multiplier	# Center Point x of pizza
         self.yCenter = 10*self.multiplier	# Center Point y of pizza
         self.calculator = pizza_calculations()
+        self.preferencesDict = {}
+        self.lineCount = 0
+        self.circleCount = 0
+        self.radioCount = 0 
 
     def customer_gen(self, num_cust, rng = None):
 
@@ -568,6 +572,83 @@ class Player:
             pizzas(list) : List of size [10,24,3], where 10 is the pizza id, 24 is the topping id, innermost list of size 3 is [x coordinate of topping center, y coordinate of topping center, topping number of topping(1/2/3/4) (Note that it starts from 1, not 0)]
         """
 
+        pizzas = []
+        radiusRange = 1
+        cutRange = 1
+        #initialize pizza types
+        if self.num_toppings == 2:
+            pizzas.append([self.lines_topping_2(preferences), "line", 0])
+            pizzas.append([self.circle_topping_2(preferences), "circle", 0])
+            cutRange = 5
+        if self.num_toppings == 3:
+            pizzas.append([self.lines_topping_3(preferences), "line", 0])
+            pizzas.append([self.circle_topping_3_v1(preferences), "circle1", 0])
+            pizzas.append([self.circle_topping_3_v2(preferences), "circle2", 0])
+            pizzas.append([self.circle_topping_3_v3(preferences), "circle3", 0])
+            pizzas.append([self.radio_topping_3(preferences), "radio", 0])
+            cutRange = 4        
+        if self.num_toppings == 4:
+            pizzas.append([self.lines_topping_4(preferences), "line", 0])
+            pizzas.append([self.circle_topping_4_v1(preferences), "circle1", 0])
+            pizzas.append([self.circle_topping_4_v2(preferences), "circle2", 0])
+            pizzas.append([self.circle_topping_4_v3(preferences), "circle3", 0])
+            pizzas.append([self.circle_topping_4_v4(preferences), "circle4", 0])
+            pizzas.append([self.circle_topping_4_v5(preferences), "circle5", 0])
+            pizzas.append([self.circle_topping_4_v6(preferences), "circle6", 0])
+            pizzas.append([self.radio_topping_4(preferences), "radio", 0])
+            cutRange = 3
+
+        for preference in preferences: #every preference
+            maximumS = -1000
+            maximumCut = [self.xCenter, self.yCenter, np.pi/6, pizzas[0]] 
+            pizza_id = 0
+            for pizzaObj in pizzas: #every pizza type
+                pizza = pizzaObj[0] 
+                pizzaType = pizzaObj[1]
+                for radius in range(0, 6, radiusRange): #radius lengths
+                    for x in range(-radius*cutRange, radius*cutRange): #how many cuts along the circumference
+                        x =  x/cutRange
+                        for ySign in range(-1, 2, 2): #top / bottom of circle
+                            y = self.circleCoordinates(x, ySign, radius)
+                            cut = [x, y, np.pi/6, pizzaType]
+                            
+                            xCord = (self.xCenter + x*self.multiplier)
+                            yCord = (self.yCenter - y*self.multiplier)
+                            obtained_pref, slice_areas_toppings = self.calculator.ratio_calculator(pizza, [xCord, yCord, np.pi/6], self.num_toppings, self.multiplier, self.xCenter, self.yCenter)
+                            obtained_pref = np.array(obtained_pref)
+                            random_pref, temp = self.calculator.ratio_calculator(pizza, [self.xCenter, self.yCenter, self.rng.random()*2*np.pi], self.num_toppings, self.multiplier, self.xCenter, self.yCenter)
+                            random_pref = np.array(random_pref)
+                            required_pref = np.array(preference)
+                            uniform_pref = np.ones((2, self.num_toppings))*(12/self.num_toppings)
+                            b = np.round(np.absolute(required_pref - uniform_pref), 3)
+                            c = np.round(np.absolute(obtained_pref - required_pref), 3)
+                            u = np.round(np.absolute(random_pref - uniform_pref), 3)
+                            s = (b-c).sum()
+                            if s > maximumS:
+                                maximumS = s
+                                maximumCut = cut
+                                maximumPizza = pizza_id
+                pizza_id += 1
+
+            #note: the dict is not in use since every preference is uniquely generated in the topping and choose pizza phases.
+            # it hard to match preferences from here to preferences in choosing the pizza    
+            hashKey = int(preference[0][0] * preference[0][1] * preference[1][0] * preference[1][1])
+            self.preferencesDict[hashKey] = maximumCut 
+
+            #store how many pizzas of each type we are building
+            pizzaBuilt = pizzas[maximumPizza][2]
+            pizzas[maximumPizza][2] = pizzaBuilt + 1
+
+        finalPizzas = []
+        for pizzaType in pizzas: #add the pizza types to the final list
+            finalPizzas += [pizzaType[0]]*(round(pizzaType[2]/10))
+
+        while len(finalPizzas) < 10: #add more pizzas if below 10
+            finalPizzas += [pizzas[0][0]]
+        finalPizzas =  finalPizzas[0:10] #make sure to only use 10 pizzas if over 10 pizzas
+        
+        return finalPizzas
+        #-2
         if self.num_toppings == 2:
 
             # we can use the approach distribution here to decide how many of each approach we want to use
